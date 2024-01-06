@@ -152,9 +152,10 @@ public:
      */
     FINLINE bool put(const Point2 &_pos, const Float *value) {
         const int channels = m_bitmap->getChannelCount();
+        const int value_channels = 5;
 
         /* Check if all sample values are valid */
-        for (int i=0; i<channels; ++i) {
+        for (int i=0; i<value_channels; ++i) {
             if (EXPECT_NOT_TAKEN((!std::isfinite(value[i]) || value[i] < 0) && m_warn))
                 goto bad_sample;
         }
@@ -189,7 +190,7 @@ public:
                 for (int x=min.x, xr=0; x<=max.x; ++x, ++xr) {
                     const Float weight = m_weightsX[xr] * weightY;
 
-                    for (int k=0; k<channels; ++k)
+                    for (int k=0; k<value_channels; ++k)
                         *dest++ += weight * value[k];
                 }
             }

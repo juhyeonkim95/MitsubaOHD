@@ -45,6 +45,8 @@ public:
     /// Return the offset of the crop window
     inline const Point2i &getCropOffset() const { return m_cropOffset; }
 
+    inline size_t getFrames() const {return m_frames; }
+
     /// Clear the film
     virtual void clear() = 0;
 
@@ -131,6 +133,7 @@ protected:
     Vector2i m_size, m_cropSize;
     bool m_highQualityEdges;
     ref<ReconstructionFilter> m_filter;
+    size_t m_frames;
 };
 
 MTS_NAMESPACE_END

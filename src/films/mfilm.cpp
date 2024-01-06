@@ -134,7 +134,15 @@ public:
         m_digits = props.getInteger("digits", 4);
         m_variable = props.getString("variable", "data");
 
-        m_storage = new ImageBlock(Bitmap::ESpectrumAlphaWeight, m_cropSize);
+        // m_storage = new ImageBlock(Bitmap::ESpectrumAlphaWeight, m_cropSize);
+
+        if (m_frames == 1) {
+            m_storage = new ImageBlock(Bitmap::ESpectrumAlphaWeight, m_cropSize);
+        } else {
+            m_pixelFormat = Bitmap::EMultiChannel;
+            m_storage = new ImageBlock(Bitmap::EMultiChannel, m_cropSize,
+                NULL, (int) (SPECTRUM_SAMPLES * m_frames + 2));
+        }
     }
 
     MFilm(Stream *stream, InstanceManager *manager)
@@ -205,6 +213,8 @@ public:
 
     bool develop(const Point2i &sourceOffset, const Vector2i &size,
             const Point2i &targetOffset, Bitmap *target) const {
+        printf("\nDevelop:\n");
+
         const Bitmap *source = m_storage->getBitmap();
         const FormatConverter *cvt = FormatConverter::getInstance(
             std::make_pair(Bitmap::EFloat, target->getComponentFormat())
@@ -263,6 +273,7 @@ public:
 
         ref<Bitmap> bitmap = m_storage->getBitmap()->convert(
             m_pixelFormat, Bitmap::EFloat);
+        printf("\nDevelop SIZE: %d, %d, %d\n", bitmap->getWidth(), bitmap->getHeight(), bitmap->getChannelCount());
 
         Log(EInfo, "Writing image to \"%s\" ..", filename.filename().string().c_str());
 

@@ -219,6 +219,20 @@ public:
         std::string componentFormat = boost::to_lower_copy(
             props.getString("componentFormat", "float16"));
 
+        if (m_frames != 1){
+			if(pixelFormats.size() > 1){
+				Log(EError, "Pixel format should not be specified! RGB format is auto-applied to all Frames");
+			}
+			if(channelNames.size() >= 1){
+				Log(EError, "Channel names should not be specified! They will be equal to the number of Frames");
+			}
+			channelNames.push_back("1");
+			for (size_t i=1; i<m_frames; ++i) {
+				pixelFormats.push_back("rgb");
+				channelNames.push_back(std::to_string(i+1));
+			}
+		}
+
         if (fileFormat == "openexr") {
             m_fileFormat = Bitmap::EOpenEXR;
         } else if (fileFormat == "rgbe") {
@@ -354,6 +368,9 @@ public:
             m_storage = new ImageBlock(Bitmap::EMultiSpectrumAlphaWeight, m_cropSize,
                 NULL, (int) (SPECTRUM_SAMPLES * m_pixelFormats.size() + 2));
         }
+
+        printf("\nAfter create SIZE: %d, %d, %d\n", m_storage->getBitmap()->getWidth(), m_storage->getBitmap()->getHeight(), m_storage->getBitmap()->getChannelCount());
+            
     }
 
     HDRFilm(Stream *stream, InstanceManager *manager)
@@ -485,6 +502,8 @@ public:
         Log(EDebug, "Developing film ..");
 
         ref<Bitmap> bitmap;
+        printf("\nDevelop SIZE: %d, %d, %d\n", m_storage->getBitmap()->getWidth(), m_storage->getBitmap()->getHeight(), m_storage->getBitmap()->getChannelCount());
+            
         if (m_pixelFormats.size() == 1) {
             bitmap = m_storage->getBitmap()->convert(m_pixelFormats[0], m_componentFormat);
             bitmap->setChannelNames(m_channelNames);
@@ -492,6 +511,7 @@ public:
             bitmap = m_storage->getBitmap()->convertMultiSpectrumAlphaWeight(m_pixelFormats,
                     m_componentFormat, m_channelNames);
         }
+        printf("\nAfter Convert Develop SIZE: %d, %d, %d\n", bitmap->getWidth(), bitmap->getHeight(), bitmap->getChannelCount());
 
         if (m_banner && m_cropSize.x > bannerWidth+5 && m_cropSize.y > bannerHeight + 5 && m_pixelFormats.size() == 1) {
             int xoffs = m_cropSize.x - bannerWidth - 5,
@@ -534,6 +554,7 @@ public:
         }
 
         bitmap->write(m_fileFormat, stream);
+        printf("Develop finished!!!\n");
     }
 
     bool hasAlpha() const {

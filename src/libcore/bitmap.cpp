@@ -276,7 +276,7 @@ extern "C" {
  * ========================== */
 
 Bitmap::Bitmap(EPixelFormat pFormat, EComponentFormat cFormat,
-        const Vector2i &size, uint8_t channelCount, uint8_t *data) : m_pixelFormat(pFormat),
+        const Vector2i &size, size_t channelCount, uint8_t *data) : m_pixelFormat(pFormat),
         m_componentFormat(cFormat), m_size(size), m_data(data), m_channelCount(channelCount), m_ownsData(false) {
     AssertEx(size.x > 0 && size.y > 0, "Invalid bitmap size");
 
@@ -291,6 +291,8 @@ Bitmap::Bitmap(EPixelFormat pFormat, EComponentFormat cFormat,
         m_data = static_cast<uint8_t *>(allocAligned(getBufferSize()));
         m_ownsData = true;
     }
+
+    //printf("CHANNEL!!!!!!!!!%d\n", m_channelCount);
 }
 
 Bitmap::Bitmap(EFileFormat format, Stream *stream, const std::string &prefix) : m_data(NULL), m_ownsData(false) {

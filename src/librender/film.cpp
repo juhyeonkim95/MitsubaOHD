@@ -52,6 +52,7 @@ Film::Film(const Properties &props)
        quality at the edges especially with large reconstruction
        filters. */
     m_highQualityEdges = props.getBoolean("highQualityEdges", false);
+    m_frames = props.getInteger("frames", 1);
 }
 
 Film::Film(Stream *stream, InstanceManager *manager)
@@ -60,6 +61,7 @@ Film::Film(Stream *stream, InstanceManager *manager)
     m_cropOffset = Point2i(stream);
     m_cropSize = Vector2i(stream);
     m_highQualityEdges = stream->readBool();
+    m_frames = stream->readSize();
     m_filter = static_cast<ReconstructionFilter *>(manager->getInstance(stream));
 }
 
@@ -71,6 +73,7 @@ void Film::serialize(Stream *stream, InstanceManager *manager) const {
     m_cropOffset.serialize(stream);
     m_cropSize.serialize(stream);
     stream->writeBool(m_highQualityEdges);
+    stream->writeSize(m_frames);
     manager->serialize(stream, m_filter.get());
 }
 

@@ -118,8 +118,14 @@ bool SamplingIntegrator::render(Scene *scene,
         nCores == 1 ? "core" : "cores");
 
     /* This is a sampling-based integrator - parallelize */
-    ref<ParallelProcess> proc = new BlockedRenderProcess(job,
+    // ref<ParallelProcess>
+    ref<BlockedRenderProcess> proc = new BlockedRenderProcess(job,
         queue, scene->getBlockSize());
+
+    proc->setPixelFormat(
+        film->getFrames() > 1 ? Bitmap::EMultiSpectrumAlphaWeight : Bitmap::ESpectrumAlphaWeight,
+        (int) (film->getFrames() * SPECTRUM_SAMPLES + 2), false);
+        
     int integratorResID = sched->registerResource(this);
     proc->bindResource("integrator", integratorResID);
     proc->bindResource("scene", sceneResID);
@@ -149,7 +155,8 @@ void SamplingIntegrator::wakeup(ConfigurableObject *parent,
 void SamplingIntegrator::renderBlock(const Scene *scene,
         const Sensor *sensor, Sampler *sampler, ImageBlock *block,
         const bool &stop, const std::vector< TPoint2<uint8_t> > &points) const {
-
+    // printf("\nrenderBlock: %d, %d, %d\n", block->getBitmap()->getWidth(), block->getBitmap()->getHeight(), block->getBitmap()->getChannelCount());
+        
     Float diffScaleFactor = 1.0f /
         std::sqrt((Float) sampler->getSampleCount());
 
