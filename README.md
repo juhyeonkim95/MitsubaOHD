@@ -33,9 +33,13 @@ where $M$ is number of time-stamps used for FFT and $N$ is spp at each time stam
 
 ## Usage
 ```
-mitsuba -L error config_example/example.xml
+cd fmcw_tutorial
+python main_run_fmcw_rendering.py           # run FMCW rendering
+python main_export_depth_velocity_map.py    # perform depth / velocity reconstruction
+python main_plot_fft_interactive.py         # interactive FFT visualization
 ```
-We also included exhaustive example configurations with result image.
+Please check [here](fmcw_tutorial/README.md) for more details.
+
 
 ## Citation
 If you find this useful for your research, please consider to cite:

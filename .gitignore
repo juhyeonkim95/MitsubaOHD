@@ -60,3 +60,4 @@ mitsuba.*.log
 /src/librender/trash
 *.npy
 /doppler_things
+/fmcw_tutorial/results
