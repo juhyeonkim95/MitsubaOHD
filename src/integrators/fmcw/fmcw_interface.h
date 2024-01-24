@@ -4,21 +4,22 @@ class FMCWInterface {
 public:
     FMCWInterface() {};
     FMCWInterface(const Properties &props) {
-        m_f_c = props.getFloat("f_c", 77);  // GHz (1e9)
+        // m_f_c = props.getFloat("f_c", 77); 
         if(props.hasProperty("wavelength")){
             Float wavelength = props.getFloat("wavelength", 1550); // nm (1e-9)
             m_f_c = 3e8 / wavelength;
+        } else{
+            m_f_c = props.getFloat("f_c", 77); // GHz (1e9)
         }
-        m_B = props.getFloat("B", 0.15);  // GHz (1e9)
-        m_T = props.getFloat("T", 7.33);  // micro second (1e-6)
+        m_B = props.getFloat("B", 1);  // GHz (1e9)
+        m_T = props.getFloat("T", 10);  // micro second (1e-6)
         m_time = props.getFloat("time", 0); // micro second (1e-6)
         m_R_min = 2 * props.getFloat("R_min", 0); // m
-        m_M = props.getInteger("M", 1024);  // number of sampled time
+        m_M = props.getInteger("M", 4096);  // number of sampled time
         m_use_collimated_light = props.getBoolean("use_collimated", false);
         m_fov_error = props.getFloat("fov_error", 0.5);
         m_use_amplitude = props.getBoolean("use_amplitude", false);
         m_sqrt_pdf = props.getBoolean("pdf_sqrt", false);
-
         bool invert = props.getBoolean("invert", false);
         if(invert){
             m_f_c += m_B;
