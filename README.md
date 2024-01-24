@@ -33,7 +33,7 @@ where $M$ is number of time-stamps used for FFT and $N$ is spp at each time stam
 
 ## Usage
 ```
-cd fmcw_tutorial
+cd fmcw_tutorial/src
 python main_run_fmcw_rendering.py           # run FMCW rendering
 python main_export_depth_velocity_map.py    # perform depth / velocity reconstruction
 python main_plot_fft_interactive.py         # interactive FFT visualization
