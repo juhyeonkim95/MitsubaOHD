@@ -7,8 +7,8 @@ There are three main files in `src` folder.
 * `main_plot_fft_interactive.py` : perform interactive FFT visualization
 
 The result of `main_export_depth_velocity_map.py` looks like
-![depthmap](../assets/depthmap.png | width=100)
-![velocitymap](../assets/velocitymap.png | width=100)
+![](../assets/depthmap.png | width=100)
+![](../assets/velocitymap.png | width=100)
 
 The result of `main_plot_fft_interactive.py` looks like
 <!-- ![visualization](../assets/interactive_fft.png) -->
