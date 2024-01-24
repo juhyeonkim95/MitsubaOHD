@@ -1596,10 +1596,10 @@ ref<Bitmap> Bitmap::convert(EPixelFormat pixelFormat,
 
 ref<Bitmap> Bitmap::convertMultiSpectrumAlphaWeight(const std::vector<EPixelFormat> &pixelFormats,
         EComponentFormat componentFormat, const std::vector<std::string> &channelNames) const {
-    if (channelNames.size() > std::numeric_limits<uint8_t>::max())
-        Log(EError, "convertMultiSpectrumAlphaWeight(): excessive number of channels!");
+    //if (channelNames.size() > std::numeric_limits<uint8_t>::max())
+    //    Log(EError, "convertMultiSpectrumAlphaWeight(): excessive number of channels!");
     ref<Bitmap> bitmap = new Bitmap(Bitmap::EMultiChannel, componentFormat,
-            m_size, (uint8_t) channelNames.size());
+            m_size, (size_t) channelNames.size());
     bitmap->setChannelNames(channelNames);
     convertMultiSpectrumAlphaWeight(this, getUInt8Data(), bitmap,
         bitmap->getUInt8Data(), pixelFormats, componentFormat,

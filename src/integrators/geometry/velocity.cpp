@@ -27,6 +27,7 @@ class RadialVelocityApproximator : public MonteCarloIntegrator {
 public:
     RadialVelocityApproximator(const Properties &props)
         : MonteCarloIntegrator(props) {
+            printf("[Velocity]\n");
             m_offset = props.getFloat("image_offset", 100); // output can be negative, so add offset to make it positive
         }
 
@@ -37,20 +38,16 @@ public:
     Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
         RadianceQueryRecord rRec2 = rRec;
 
-        RayDifferential ray1;
-        rRec.scene->getSensor()->sampleRayDifferential(
-            ray1, rRec.samplePos, rRec.apertureSample, 0.0);
-        ray1.scaleDifferential(rRec.diffScaleFactor);
+        RayDifferential ray1 = r;
+        ray1.setTime(0.0);
         
-        RayDifferential ray2;
-        rRec.scene->getSensor()->sampleRayDifferential(
-            ray2, rRec.samplePos, rRec.apertureSample, 1.0);
-        ray2.scaleDifferential(rRec.diffScaleFactor);
+        RayDifferential ray2 = r;
+        ray2.setTime(1e-6);
 
         rRec.rayIntersect(ray1);
         rRec2.rayIntersect(ray2);
         
-        if(rRec.its.isValid() && rRec2.its.isValid()){
+        if(rRec.its.isValid() && rRec2.its.isValid() && rRec.its.instance == rRec2.its.instance){
             Float d1 = rRec.its.t;
             Float d2 = rRec2.its.t;
             Float v = (d1 - d2) / (ray1.time - ray2.time);

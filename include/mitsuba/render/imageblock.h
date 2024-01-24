@@ -152,7 +152,7 @@ public:
      */
     FINLINE bool put(const Point2 &_pos, const Float *value) {
         const int channels = m_bitmap->getChannelCount();
-        const int value_channels = 5;
+        const int value_channels = channels;
 
         /* Check if all sample values are valid */
         for (int i=0; i<value_channels; ++i) {
@@ -215,9 +215,10 @@ public:
 
     FINLINE bool put_no_recon(const Point2 &_pos, const Float *value) {
         const int channels = m_bitmap->getChannelCount();
+        const int value_channels = channels;
 
         /* Check if all sample values are valid */
-        for (int i=0; i<channels; ++i) {
+        for (int i=0; i<value_channels; ++i) {
             if (EXPECT_NOT_TAKEN((!std::isfinite(value[i]) || value[i] < 0) && m_warn))
                 goto bad_sample;
         }
@@ -231,8 +232,70 @@ public:
             const Vector2i &size = m_bitmap->getSize();
             Float *dest = m_bitmap->getFloatData() + (pos.y * (size_t) size.x + pos.x) * channels;
 
-            for (int k=0; k<channels; ++k)
+            for (int k=0; k<value_channels; ++k)
                 *dest++ += value[k];
+        }
+
+        return true;
+
+        bad_sample:
+        {
+            std::ostringstream oss;
+            oss << "Invalid sample value : [";
+            for (int i=0; i<channels; ++i) {
+                oss << value[i];
+                if (i+1 < channels)
+                    oss << ", ";
+            }
+            oss << "]";
+            Log(EWarn, "%s", oss.str().c_str());
+        }
+        return false;
+    }
+
+
+    FINLINE bool put_single(const Point2 &_pos, size_t offset, size_t length, const Float* value) {
+        const int channels = m_bitmap->getChannelCount();
+        /* Check if all sample values are valid */
+        for (int i=0; i<length; ++i) {
+            if (EXPECT_NOT_TAKEN((!std::isfinite(value[i]) || value[i] < 0) && m_warn))
+                goto bad_sample;
+        }
+
+        {
+            const Float filterRadius = m_filter->getRadius();
+            const Vector2i &size = m_bitmap->getSize();
+
+            /* Convert to pixel coordinates within the image block */
+            const Point2 pos(
+                _pos.x - 0.5f - (m_offset.x - m_borderSize),
+                _pos.y - 0.5f - (m_offset.y - m_borderSize));
+
+            /* Determine the affected range of pixels */
+            const Point2i min(std::max((int) std::ceil (pos.x - filterRadius), 0),
+                              std::max((int) std::ceil (pos.y - filterRadius), 0)),
+                          max(std::min((int) std::floor(pos.x + filterRadius), size.x - 1),
+                              std::min((int) std::floor(pos.y + filterRadius), size.y - 1));
+
+            /* Lookup values from the pre-rasterized filter */
+            for (int x=min.x, idx = 0; x<=max.x; ++x)
+                m_weightsX[idx++] = m_filter->evalDiscretized(x-pos.x);
+            for (int y=min.y, idx = 0; y<=max.y; ++y)
+                m_weightsY[idx++] = m_filter->evalDiscretized(y-pos.y);
+
+            /* Rasterize the filtered sample into the framebuffer */
+            for (int y=min.y, yr=0; y<=max.y; ++y, ++yr) {
+                const Float weightY = m_weightsY[yr];
+                Float *dest = m_bitmap->getFloatData()
+                    + (y * (size_t) size.x + min.x) * channels + offset;
+
+                for (int x=min.x, xr=0; x<=max.x; ++x, ++xr) {
+                    const Float weight = m_weightsX[xr] * weightY;
+
+                    for (int k=0; k<length; ++k)
+                        *dest++ += weight * value[k];
+                }
+            }
         }
 
         return true;

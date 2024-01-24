@@ -479,6 +479,18 @@ protected:
     bool m_hideEmitters;
 };
 
+// NEW MC Estimator that saves all of the path info
+// class MTS_EXPORT_RENDER ExhaustivePathIntegrator : public MonteCarloIntegrator {
+// public:
+//     /// Serialize this integrator to a binary data stream
+//     std::vector<std::tuple<Spectrum, Float>> Li_helper(const RayDifferential &r, RadianceQueryRecord &rRec) const;
+//     MTS_DECLARE_CLASS()
+// protected:
+//     /// Create a integrator
+//     ExhaustivePathIntegrator(const Properties &props);
+//     bool m_use_collimated_light;
+// };
+
 MTS_NAMESPACE_END
 
 #endif /* __MITSUBA_RENDER_INTEGRATOR_H_ */

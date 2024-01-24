@@ -139,8 +139,8 @@ public:
         if (m_frames == 1) {
             m_storage = new ImageBlock(Bitmap::ESpectrumAlphaWeight, m_cropSize);
         } else {
-            m_pixelFormat = Bitmap::EMultiChannel;
-            m_storage = new ImageBlock(Bitmap::EMultiChannel, m_cropSize,
+            // m_pixelFormat = Bitmap::EMultiChannel;
+            m_storage = new ImageBlock(Bitmap::EMultiSpectrumAlphaWeight, m_cropSize,
                 NULL, (int) (SPECTRUM_SAMPLES * m_frames + 2));
         }
     }
@@ -271,8 +271,30 @@ public:
         if (extension != expectedExtension)
             filename.replace_extension(expectedExtension);
 
-        ref<Bitmap> bitmap = m_storage->getBitmap()->convert(
-            m_pixelFormat, Bitmap::EFloat);
+        // ref<Bitmap> bitmap = m_storage->getBitmap()->convert(m_pixelFormat, Bitmap::EFloat);
+        ref<Bitmap> bitmap;
+        if (m_frames == 1) {
+            bitmap = m_storage->getBitmap()->convert(m_pixelFormat, Bitmap::EFloat);
+            // bitmap->setChannelNames(m_channelNames);
+        } else {
+            std::vector<Bitmap::EPixelFormat> pixelFormats;
+            std::vector<std::string> channelNames;
+
+            for(size_t i=0; i<m_frames; i++){
+                pixelFormats.push_back(m_pixelFormat);
+                if (m_pixelFormat == Bitmap::ELuminance) {
+                    channelNames.push_back(std::to_string(i+1) + "Y");
+                } else if(m_pixelFormat == Bitmap::ERGB){
+                    channelNames.push_back(std::to_string(i+1) + "R");
+                    channelNames.push_back(std::to_string(i+1) + "G");
+                    channelNames.push_back(std::to_string(i+1) + "B");
+                }
+            }
+
+            bitmap = m_storage->getBitmap()->convertMultiSpectrumAlphaWeight(pixelFormats,
+                    Bitmap::EFloat, channelNames);
+        }
+
         printf("\nDevelop SIZE: %d, %d, %d\n", bitmap->getWidth(), bitmap->getHeight(), bitmap->getChannelCount());
 
         Log(EInfo, "Writing image to \"%s\" ..", filename.filename().string().c_str());

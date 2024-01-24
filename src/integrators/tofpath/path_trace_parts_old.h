@@ -43,13 +43,6 @@ public:
         eta = 1.0;
         scattered = false;
         path_terminated = !its.isValid();
-        first_its = its;
-        first_path_length = path_length;
-        if(first_its.isValid()){
-            first_bsdf = first_its.getBSDF();
-        }
-
-        m_use_collimated_light = false;
     }
 
      PathTracePart& operator=(const PathTracePart& copy) = default;
@@ -96,9 +89,6 @@ public:
     Intersection its;
     Intersection next_its;
     Intersection prev_its;
-    Intersection first_its;
-    Float first_path_length;
-    bool m_use_collimated_light;
     DirectSamplingRecord dRec;
     Float path_length;
     Float em_path_length;
@@ -119,147 +109,56 @@ public:
     Spectrum bsdfVal;
     Vector wo;
     Point2 sample;
-    const BSDF *first_bsdf;
 
     void nee_trace(Point2 &sample, bool testVisibility=true){
         bsdfPdf = 0.0f;
         lumPdf = 0.0f;
         path_throughput_nee = Spectrum(0.0f);
         G_nee = 1.0;
-        neeEmitterValue = Spectrum(0.0f);
         if(this->path_terminated)
             return;
-        if(!its.isValid()){
-            this->path_terminated=true;
-            return;
-        }
+
         const BSDF *bsdf = its.getBSDF(ray);
-        // const BSDF *first_bsdf = first_its.getBSDF();
 
         dRec = DirectSamplingRecord(its);
 
         if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
             (bsdf->getType() & BSDF::ESmooth)) {
+            neeEmitterValue = scene->sampleEmitterDirect(dRec, sample, testVisibility);
+            neeEmitterValue *= dRec.pdf;
+            em_path_length = path_length + dRec.dist;
             
-            if(m_use_collimated_light && rRec.depth > 1){
-                
-                Point origin = first_its.p;
-                Vector direction = (origin - its.p);
-                Float distance = direction.length();
-                Float invDist = 1.0f / distance;
-                direction *= invDist;
-                Ray ray_temp(origin, direction, Epsilon,
-                    distance*(1-ShadowEpsilon), ray.time);
-                Intersection its_temp;
-
-                if(!scene->rayIntersect(ray_temp, its_temp)){
-                    Spectrum value(1.0);
-
-                    /* Allocate a record for querying the BSDF */
-                    BSDFSamplingRecord bRec(its, its.toLocal(direction), ERadiance);
-
-                    /* Evaluate BSDF * cos(theta) */
-                    const Spectrum bsdfVal = bsdf->eval(bRec);
-
-                    /* Prevent light leaks due to the use of shading normals */
-                    if (!bsdfVal.isZero() && (!m_strictNormals
-                            || dot(its.geoFrame.n, direction) * Frame::cosTheta(bRec.wo) > 0)) {
-
-                        /* Calculate prob. of having generated that direction
-                        using BSDF sampling */
-                        Float bsdfPdf = 0;
-
-                        /* Weight using the power heuristic */
-                        Float weight = 1.0; //miWeight(dRec.pdf, bsdfPdf);
-
-                        em_path_length = path_length + distance + first_path_length;
-                    
-                        /* Allocate a record for querying the BSDF */
-                        BSDFSamplingRecord bRec2(first_its, first_its.toLocal(-direction), ERadiance);
-
-                        /* Evaluate BSDF * cos(theta) */
-                        const Spectrum bsdfVal2 = first_bsdf->eval(bRec2);
-                        
-                        G_nee = 1;
-                        neeEmitterValue = value;
-                        path_throughput_nee = path_throughput * bsdfVal * weight * bsdfVal2;
-
-                        
-                        // results.push_back({Li, em_path_length});
-
-                        // put_Li_to_block(Li, em_path_length, block, sampled_pos, rRec.alpha);
-                    }
-                }
-                
-            } else if (m_use_collimated_light && rRec.depth == 1) {
-                Point origin = ray.o;
-                Vector direction = (origin - its.p);
-                Float distance = direction.length();
-                Float invDist = 1.0f / distance;
-                direction *= invDist;
-
-                Spectrum value(1.0);
-
+            const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
+            if (!neeEmitterValue.isZero()) {
                 /* Allocate a record for querying the BSDF */
-                BSDFSamplingRecord bRec(its, its.toLocal(direction), ERadiance);
+                BSDFSamplingRecord bRec(its, its.toLocal(dRec.d), ERadiance);
 
                 /* Evaluate BSDF * cos(theta) */
                 const Spectrum bsdfVal = bsdf->eval(bRec);
 
                 /* Prevent light leaks due to the use of shading normals */
                 if (!bsdfVal.isZero() && (!m_strictNormals
-                        || dot(its.geoFrame.n, direction) * Frame::cosTheta(bRec.wo) > 0)) {
+                        || dot(its.geoFrame.n, dRec.d) * Frame::cosTheta(bRec.wo) > 0)) {
 
                     /* Calculate prob. of having generated that direction
-                    using BSDF sampling */
-                    Float bsdfPdf = 0;
+                        using BSDF sampling */
+                    lumPdf = dRec.pdf;
+                    bsdfPdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)
+                        ? bsdf->pdf(bRec) : 0;
 
                     /* Weight using the power heuristic */
-                    Float weight = 1.0; //miWeight(dRec.pdf, bsdfPdf);
-
-                    em_path_length = path_length + distance;
-
+                    // mis_weight_nee = miWeight(angle_pdf_nee_as_nee, angle_pdf_nee_as_bsdf, 2);
                     G_nee = 1;
-                    neeEmitterValue = value;
-                    path_throughput_nee = path_throughput * bsdfVal * weight;
-                }
-            } else {
-                neeEmitterValue = scene->sampleEmitterDirect(dRec, sample, testVisibility);
-                neeEmitterValue *= dRec.pdf;
-                em_path_length = path_length + dRec.dist;
-                
-                const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
-                if (!neeEmitterValue.isZero()) {
-                    /* Allocate a record for querying the BSDF */
-                    BSDFSamplingRecord bRec(its, its.toLocal(dRec.d), ERadiance);
-
-                    /* Evaluate BSDF * cos(theta) */
-                    const Spectrum bsdfVal = bsdf->eval(bRec);
-
-                    /* Prevent light leaks due to the use of shading normals */
-                    if (!bsdfVal.isZero() && (!m_strictNormals
-                            || dot(its.geoFrame.n, dRec.d) * Frame::cosTheta(bRec.wo) > 0)) {
-
-                        /* Calculate prob. of having generated that direction
-                            using BSDF sampling */
-                        lumPdf = dRec.pdf;
-                        bsdfPdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)
-                            ? bsdf->pdf(bRec) : 0;
-
-                        /* Weight using the power heuristic */
-                        // mis_weight_nee = miWeight(angle_pdf_nee_as_nee, angle_pdf_nee_as_bsdf, 2);
-                        G_nee = 1;
-                        if(emitter->isOnSurface()){
-                            G_nee = std::abs(dot(dRec.d, dRec.n)) / (dRec.dist * dRec.dist);
-                        }
-                        // path_pdf_nee_as_nee = angle_pdf_nee_as_nee * G_nee;
-                        // if(given_path_pdf_nee_as_next_ray >= 0){
-                        //     path_pdf_nee_as_next_ray = given_path_pdf_nee_as_next_ray;
-                        // } else {
-                        //     path_pdf_nee_as_next_ray = angle_pdf_nee_as_bsdf * G_nee;
-                        // }
-                        path_throughput_nee = path_throughput * bsdfVal;
+                    if(emitter->isOnSurface()){
+                        G_nee = std::abs(dot(dRec.d, dRec.n)) / (dRec.dist * dRec.dist);
                     }
+                    // path_pdf_nee_as_nee = angle_pdf_nee_as_nee * G_nee;
+                    // if(given_path_pdf_nee_as_next_ray >= 0){
+                    //     path_pdf_nee_as_next_ray = given_path_pdf_nee_as_next_ray;
+                    // } else {
+                    //     path_pdf_nee_as_next_ray = angle_pdf_nee_as_bsdf * G_nee;
+                    // }
+                    path_throughput_nee = path_throughput * bsdfVal;
                 }
             }
         }
@@ -283,7 +182,7 @@ public:
         
         BSDFSamplingRecord bRec(its, rRec.sampler, ERadiance);
         Spectrum bsdfWeight = bsdf->sample(bRec, bsdfPdf, sample);
-        bsdfVal = bsdfWeight; // * bsdfPdf;
+        bsdfVal = bsdfWeight * bsdfPdf;
 
         const Vector wo = its.toWorld(bRec.wo);
         ray = Ray(its.p, wo, ray.time);
@@ -411,11 +310,6 @@ public:
 
     void bsdf_trace(const BSDFSamplingRecord& bRec){
         this->wo = bRec.wo;
-        if (!its.isValid()){
-            path_terminated = true;
-            return;
-        }
-
         const BSDF *bsdf = its.getBSDF(ray);
 
         /* Sample BSDF * cos(theta) */

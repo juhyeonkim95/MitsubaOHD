@@ -51,6 +51,16 @@ Vector squareToCosineHemisphere(const Point2 &sample) {
     return Vector(p.x, p.y, z);
 }
 
+Vector squareToCosineHemispherePow(const Point2 &sample, Float pow) {
+    Float theta = std::acos(std::pow(sample.x, 1 / (pow + 1)));
+    Float phi = 2 * M_PI * sample.y;
+    
+    Float x = std::cos(phi) * std::sin(theta);
+    Float y = std::sin(phi) * std::sin(theta);
+    Float z = std::cos(theta);
+    return Vector(x, y, z);
+}
+
 Point2 cosineHemisphereToSquare(const Vector &v){
     Point2 p = Point2(v.x, v.y);
     Point2 sample = uniformDiskToSquareConcentric(p);

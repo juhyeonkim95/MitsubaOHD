@@ -50,6 +50,7 @@ namespace warp {
 
     /// Sample a cosine-weighted vector on the unit hemisphere with respect to solid angles
     extern MTS_EXPORT_CORE Vector squareToCosineHemisphere(const Point2 &sample);
+    extern MTS_EXPORT_CORE Vector squareToCosineHemispherePow(const Point2 &sample, Float pow);
 
     /// Inverse of squareToCosineHemisphere
     extern MTS_EXPORT_CORE Point2 cosineHemisphereToSquare(const Vector &v);
@@ -58,7 +59,8 @@ namespace warp {
     /// Density of \ref squareToCosineHemisphere() with respect to solid angles
     extern MTS_EXPORT_CORE inline Float squareToCosineHemispherePdf(const Vector &d)
         { return INV_PI * Frame::cosTheta(d); }
-
+    extern MTS_EXPORT_CORE inline Float squareToCosineHemispherePdfPow(const Vector &d, Float pow)
+        { return INV_PI * 0.5 * std::pow(Frame::cosTheta(d), pow) * (pow + 1); }
     /**
      * \brief Uniformly sample a vector that lies within a given
      * cone of angles around the Z axis
