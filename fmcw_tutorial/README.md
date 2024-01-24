@@ -7,11 +7,13 @@ There are three main files in `src` folder.
 * `main_plot_fft_interactive.py` : perform interactive FFT visualization
 
 The result of `main_export_depth_velocity_map.py` looks like
+
 <img src="../assets/depthmap.png" width="200" height="200">
 <img src="../assets/velocitymap.png" width="200" height="200">
 
 The result of `main_plot_fft_interactive.py` looks like
-<img src="../assets/interactive_fft.png" width="200" height="400">
+
+<img src="../assets/interactive_fft.png" width="400" height="200">
 
 We will skip the details for the code, but interested reader could check out the detailed code.
 
