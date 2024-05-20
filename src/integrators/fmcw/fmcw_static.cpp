@@ -193,8 +193,7 @@ public:
             /* Estimate the direct illumination if this is requested */
             DirectSamplingRecord dRec(its);
 
-            if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
-                (bsdf->getType() & BSDF::ESmooth)) {
+            if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance) {
 
                 if(m_use_collimated_light && rRec.depth > 1){
                     Point origin = first_its.p;

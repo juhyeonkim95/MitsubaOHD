@@ -28,6 +28,7 @@ Sensor::Sensor(const Properties &props)
  : AbstractEmitter(props) {
     m_shutterOpen = props.getFloat("shutterOpen", 0.0f);
     Float shutterClose = props.getFloat("shutterClose", 0.0f);
+    m_velocity = props.getVector("velocity", Vector(0.0));
     m_shutterOpenTime = shutterClose - m_shutterOpen;
 
     if (m_shutterOpenTime < 0)

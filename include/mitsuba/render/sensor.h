@@ -322,6 +322,9 @@ public:
      */
     inline Sampler *getSampler() { return m_sampler; }
 
+    
+    inline Vector getVelocity() const { return m_velocity; }
+
     /**
      * \brief Return the sensor's sampler (const version).
      *
@@ -372,6 +375,7 @@ protected:
     Float m_shutterOpen;
     Float m_shutterOpenTime;
     Float m_aspect;
+    Vector m_velocity;
 };
 
 /**

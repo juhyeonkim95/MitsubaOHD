@@ -18,6 +18,7 @@ public:
         m_M = props.getInteger("M", 4096);  // number of sampled time
         m_use_collimated_light = props.getBoolean("use_collimated", false);
         m_fov_error = props.getFloat("fov_error", 0.5);
+        m_laser_mrad = props.getFloat("m_laser_mrad", -1.0);
         m_use_amplitude = props.getBoolean("use_amplitude", false);
         m_sqrt_pdf = props.getBoolean("pdf_sqrt", false);
         bool invert = props.getBoolean("invert", false);
@@ -27,7 +28,7 @@ public:
         }
 
 
-        printf("[FMCWInterface INFO - static]\n");
+        printf("[FMCWInterface INFO]\n");
         printf("\tT (us): %f\n", m_T);
         printf("\tB (GHz): %f\n", m_B);
         printf("\tf_c (GHz): %f\n", m_f_c);
@@ -43,6 +44,111 @@ public:
                 printf("\tm_sqrt_pdf: True\n");
         } else { printf("\tm_sqrt_pdf: False\n");}
     };
+
+    Float get_fmcw_weight_velocity(Float t, Float path_length, Float path_velocity) const {
+        // R / c
+        // R / 3e8 * 1e6
+        Float t_d = (path_length - m_R_min) / 3e2; 
+        
+        // B * 1e9 * t_d * 1e-6 * t * 1e-6 / (T * 1e-6)
+        Float r = 2 * M_PI * m_B * t_d * t / m_T * 1e3;
+
+        // f_c * 1e9 * v * t * 1e-6 / 3e8
+        Float D = 2 * M_PI * m_f_c * path_velocity * t / 3e5;
+
+
+        // 2 * pi * f_c * t_d
+        // 2 * pi * f_c * 1e9 * t_d * 1e-6
+        Float p = 2 * M_PI * m_f_c * t_d * 1e3;
+
+        return (std::cos(r + D + p));
+    }
+
+    Float get_fmcw_weight_velocity_inverted(Float t, Float path_length, Float path_velocity) const {
+        Float n_f_c = m_f_c + m_B;
+        Float n_B = -m_B;
+
+        // R / c
+        // R / 3e8 * 1e6
+        Float t_d = (path_length - m_R_min) / 3e2; 
+        
+        // B * 1e9 * t_d * 1e-6 * t * 1e-6 / (T * 1e-6)
+        Float r = 2 * M_PI * n_B * t_d * t / m_T * 1e3;
+
+        // f_c * 1e9 * v * t * 1e-6 / 3e8
+        Float D = 2 * M_PI * n_f_c * path_velocity * t / 3e5;
+
+        // 2 * pi * f_c * t_d
+        // 2 * pi * f_c * 1e9 * t_d * 1e-6
+        Float p = 2 * M_PI * n_f_c * t_d * 1e3;
+
+        return (std::cos(r + D + p));
+    }
+
+    Float get_fmcw_weight_velocity_freq(Float path_length, Float path_velocity) const {
+        // R / c
+        // R / 3e8 * 1e6
+        Float t_d = (path_length - m_R_min) / 3e2; 
+        
+        // B * 1e9 * t_d * 1e-6  / (T * 1e-6) * 1e-6
+        Float f_r = m_B * t_d / m_T * 1e3;
+
+        // f_c * 1e9 * v * t * 1e-6 / 3e8 * 1e-6
+        Float f_D = m_f_c * path_velocity / 3e5;
+
+        return f_r + f_D;
+    }
+
+    Float get_fmcw_weight_velocity_phase(Float path_length, Float path_velocity) const {
+        // R / c
+        // R / 3e8 * 1e6
+        Float B = m_B * 1e9;
+        Float f_c = m_f_c * 1e9;
+        Float T = m_T * 1e-6;
+        Float c = 3e8;
+
+        Float tau = (path_length) / c;
+
+        Float delta_fc = f_c * path_velocity / c;
+        Float t1 = (f_c + delta_fc) * tau;
+        Float t2 = (B / T) * tau * tau;
+
+        return t1 + t2;
+    }
+
+    Float get_fmcw_weight_velocity_phase_invert(Float path_length, Float path_velocity) const {
+        // R / c
+        // R / 3e8 * 1e6
+        Float B = -m_B * 1e9;
+        Float f_c = m_f_c * 1e9;
+        Float T = m_T * 1e-6;
+        Float c = 3e8;
+
+        Float tau = (path_length) / c;
+
+        Float delta_fc = f_c * path_velocity / c;
+        Float t1 = (f_c + delta_fc) * tau;
+        Float t2 = (B / T) * tau * tau;
+
+        return t1 + t2;
+    }
+
+    Float get_fmcw_weight_velocity_inverted_freq(Float path_length, Float path_velocity) const {
+        //Float n_f_c = m_f_c + m_B;
+        //Float n_B = -m_B;
+
+        // R / c
+        // R / 3e8 * 1e6
+        Float t_d = (path_length - m_R_min) / 3e2; 
+        
+        // B * 1e9 * t_d * 1e-6  / (T * 1e-6) * 1e-6
+        Float f_r = m_B * t_d / m_T * 1e3;
+
+        // f_c * 1e9 * v * t * 1e-6 / 3e8 * 1e-6
+        Float f_D = m_f_c * path_velocity / 3e5;
+
+        return (f_r - f_D);
+    }
 
     Float get_fmcw_weight(Float t, Float path_length) const {
         // R / c
@@ -87,6 +193,8 @@ public:
         return (std::cos(A + B + C));
     }
 
+    
+
 protected:
     Float m_time;
     Float m_B;
@@ -94,6 +202,7 @@ protected:
     Float m_f_c;
     Float m_R_min;
     Float m_fov_error;
+    Float m_laser_mrad;
     size_t m_M;
     bool m_use_collimated_light;
     bool m_use_amplitude;

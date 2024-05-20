@@ -5,6 +5,7 @@
 
 using namespace mitsuba;
 
+
 class PathTracePart
 {
 public:
@@ -142,7 +143,6 @@ public:
             (bsdf->getType() & BSDF::ESmooth)) {
             
             if(m_use_collimated_light && rRec.depth > 1){
-                
                 Point origin = first_its.p;
                 Vector direction = (origin - its.p);
                 Float distance = direction.length();
@@ -154,6 +154,8 @@ public:
 
                 if(!scene->rayIntersect(ray_temp, its_temp)){
                     Spectrum value(1.0);
+                    //value *= invDist * invDist;
+                    //value /= (4 * M_PIf);
 
                     /* Allocate a record for querying the BSDF */
                     BSDFSamplingRecord bRec(its, its.toLocal(direction), ERadiance);
@@ -183,10 +185,7 @@ public:
                         G_nee = 1;
                         neeEmitterValue = value;
                         path_throughput_nee = path_throughput * bsdfVal * weight * bsdfVal2;
-
-                        
                         // results.push_back({Li, em_path_length});
-
                         // put_Li_to_block(Li, em_path_length, block, sampled_pos, rRec.alpha);
                     }
                 }
@@ -283,7 +282,7 @@ public:
         
         BSDFSamplingRecord bRec(its, rRec.sampler, ERadiance);
         Spectrum bsdfWeight = bsdf->sample(bRec, bsdfPdf, sample);
-        bsdfVal = bsdfWeight; // * bsdfPdf;
+        bsdfVal = bsdfWeight * bsdfPdf;
 
         const Vector wo = its.toWorld(bRec.wo);
         ray = Ray(its.p, wo, ray.time);
@@ -488,3 +487,41 @@ public:
         }
     }
 };
+
+
+struct PathInfo
+{
+    std::vector<Intersection> path;
+
+    void add_its(Intersection& its){
+        path.push_back(its);
+    }
+
+    
+};
+
+bool check_its_consistency(Intersection& its1, Intersection& its2){
+    bool consistency = true;
+    if (!its1.isValid() && !its2.isValid()){
+        return true;
+    }
+
+    consistency &= its1.isValid() && its2.isValid();
+    consistency &= dot(its1.shFrame.n, its2.shFrame.n) > 0.8;
+    consistency &= (its1.instance == its2.instance);
+    return consistency;
+}
+
+bool check_path_consistency(PathInfo &path1, PathInfo &path2){
+    bool consistency = true;
+    if(path1.path.size() == path2.path.size()){
+        for(int i=0; i<path1.path.size(); i++){
+            consistency &= check_its_consistency(path1.path.at(i), path2.path.at(i));
+            if(!consistency){
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}

@@ -110,6 +110,16 @@ void Intersection::getNormalDerivative(Vector &dndu, Vector &dndv,
         shape->getNormalDerivative(*this, dndu, dndv, shadingFrame);
 }
 
+Vector Intersection::getVelocity() const {
+    if(instance){
+        return instance->getVelocity();
+    }
+    if(shape){
+        return shape->getVelocity();
+    }
+    return Vector(0.0);
+}
+
 inline const PhaseFunction *MediumSamplingRecord::getPhaseFunction() const {
     return medium->getPhaseFunction();
 }

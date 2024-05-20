@@ -9,6 +9,8 @@ plugins += env.SharedLibrary('roughdiffuse', ['roughdiffuse.cpp'])
 plugins += env.SharedLibrary('roughdielectric', ['roughdielectric.cpp'])
 plugins += env.SharedLibrary('roughconductor', ['roughconductor.cpp'])
 plugins += env.SharedLibrary('roughplastic', ['roughplastic.cpp'])
+plugins += env.SharedLibrary('retroreflective', ['retroreflective.cpp'])
+plugins += env.SharedLibrary('roughretroreflective', ['roughretroreflective.cpp'])
 
 # Materials that act as modifiers
 plugins += env.SharedLibrary('twosided', ['twosided.cpp'])

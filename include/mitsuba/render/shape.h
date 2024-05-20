@@ -125,6 +125,8 @@ public:
     inline void getNormalDerivative(Vector &dndu, Vector &dndv,
         bool shadingFrame = true) const;
 
+    inline Vector getVelocity() const;
+
     /// Return a string representation
     std::string toString() const;
 public:
@@ -185,6 +187,9 @@ public:
     //float e0;
     //float e1;
     //float e2;
+
+    /// velocity
+    Vector velocity;
 };
 
 /** \brief Abstract base class of all shapes
@@ -524,6 +529,8 @@ public:
     /// Add an unnamed child
     inline void addChild(ConfigurableObject *child) { addChild("", child); }
 
+    inline Vector getVelocity() const { return m_velocity; }
+    inline void setVelocity(Vector velocity) { m_velocity = velocity; }
     //! @}
     // =============================================================
 
@@ -545,6 +552,7 @@ protected:
     ref<Sensor> m_sensor;
     ref<Medium> m_interiorMedium;
     ref<Medium> m_exteriorMedium;
+    Vector m_velocity;
 };
 
 MTS_NAMESPACE_END

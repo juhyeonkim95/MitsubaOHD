@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <mitsuba/render/scene.h>
 #include <mitsuba/core/statistics.h>
 #include <string>
@@ -17,12 +20,12 @@ void printVector(Vector p1, Vector p2){
     printf("V1: %f, %f, %f / V2: %f, %f, %f\n", p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
 }
 
-inline Float miWeight(Float pdfA, Float pdfB, float power=1) {
-    if(pdfA == 0.0f && pdfB == 0.0){
-        return 0.0f;
+inline Float miWeight(Float pdfA, Float pdfB, float power=1.0) {
+    if(pdfA == 0.0 && pdfB == 0.0){
+        return 0.0;
     }
-    float ap = (pdfA == 0.0)? 0.0 : std::pow(pdfA, power);
-    float bp = (pdfB == 0.0)? 0.0 : std::pow(pdfB, power);
+    Float ap = (pdfA == 0.0)? 0.0 : std::pow(pdfA, power);
+    Float bp = (pdfB == 0.0)? 0.0 : std::pow(pdfB, power);
     return ap / (ap + bp);
 }
 
@@ -59,3 +62,5 @@ std::vector<float> parse_float_array_from_string (std::string &numbers) {
 
     return v;
 }
+
+#endif

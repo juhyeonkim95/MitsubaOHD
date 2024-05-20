@@ -55,8 +55,8 @@ public:
     IndependentSampler(const Properties &props) : Sampler(props) {
         /* Number of samples per pixel when used with a sampling-based integrator */
         m_sampleCount = props.getSize("sampleCount", 4);
-        m_random = new Random();
-        m_random_backup = new Random();
+        m_random = new Random(uint64_t(0));
+        m_random_backup = new Random(uint64_t(0));
     }
 
     IndependentSampler(Stream *stream, InstanceManager *manager)

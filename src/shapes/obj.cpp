@@ -805,6 +805,8 @@ public:
 
         mesh->incRef();
         m_materialAssignment.push_back(materialName);
+        mesh->setVelocity(m_velocity);
+
         m_meshes.push_back(mesh);
         Log(EInfo, "%s: " SIZE_T_FMT " triangles, " SIZE_T_FMT
             " vertices (merged " SIZE_T_FMT " vertices).", name.c_str(),

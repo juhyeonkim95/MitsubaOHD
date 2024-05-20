@@ -30,6 +30,7 @@ MTS_NAMESPACE_BEGIN
 Shape::Shape(const Properties &props)
  : ConfigurableObject(props) {
     m_name = props.getID();
+    m_velocity = props.getVector("velocity", Vector(0.0));
 }
 
 Shape::Shape(Stream *stream, InstanceManager *manager)
@@ -41,6 +42,7 @@ Shape::Shape(Stream *stream, InstanceManager *manager)
     m_sensor = static_cast<Sensor *>(manager->getInstance(stream));
     m_interiorMedium = static_cast<Medium *>(manager->getInstance(stream));
     m_exteriorMedium = static_cast<Medium *>(manager->getInstance(stream));
+    m_velocity = Vector(stream);
 }
 
 Shape::~Shape() { }
