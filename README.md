@@ -1,5 +1,6 @@
 # Mitsuba0.6 FMCW Renderer
-This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Frequency-Modulated Continuous-Wave LiDAR" (SIGGRAPH Asia 2024 paper id 403)
+This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection" (SIGGRAPH 2025 paper id 247)
+This repository serves FMCW simulation.
 
 ## Install
 To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
@@ -22,8 +23,7 @@ New integrators are added in `src/integrators/fmcw` folder, for FMCW rendering.
 * `f_c` : Laser frequency in GHz. If `wavelength` is also defined, we use `wavelength` first (default : 77)
 * `use_collimated` : Ignore light setting and use collimated laser (default : false)
 * `fov_error` : Additional parameter to change laser FOV. If set to $a$, instead of uniform sample from whole pixel, we sample centered area with $2a$ (default : 0.5).
-* `use_amplitude` : use sqrt for the output (default : false)
-* `pdf_sqrt` : divide output with pdf sqrt (default : false)
+
 
 ## Usage
 ```
