@@ -1,5 +1,10 @@
 using namespace mitsuba;
 
+#include <mitsuba/mitsuba.h>
+#include <mitsuba/core/frame.h>
+#include <mitsuba/core/properties.h>
+#include <boost/algorithm/string.hpp>
+
 class FMCWInterface {
 public:
     FMCWInterface() {};
@@ -21,6 +26,8 @@ public:
         m_laser_mrad = props.getFloat("m_laser_mrad", -1.0);
         m_use_amplitude = props.getBoolean("use_amplitude", false);
         m_sqrt_pdf = props.getBoolean("pdf_sqrt", false);
+        m_use_random_phase = props.getBoolean("use_random_phase", true);
+        
         bool invert = props.getBoolean("invert", false);
         if(invert){
             m_f_c += m_B;
@@ -45,7 +52,7 @@ public:
         } else { printf("\tm_sqrt_pdf: False\n");}
     };
 
-    Float get_fmcw_weight_velocity(Float t, Float path_length, Float path_velocity) const {
+    std::pair<Float, Float> get_fmcw_weight_velocity(Float t, Float path_length, Float path_velocity, Float random_phase) const {
         // R / c
         // R / 3e8 * 1e6
         Float t_d = (path_length - m_R_min) / 3e2; 
@@ -60,11 +67,16 @@ public:
         // 2 * pi * f_c * t_d
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
         Float p = 2 * M_PI * m_f_c * t_d * 1e3;
+        Float final_phase = r + D + p + 2 * M_PI *random_phase;
+        
+        Float sin_phi = std::sin(final_phase);
+        Float cos_phi = std::cos(final_phase);
+        // math::sincos(final_phase, &sin_phi, &cos_phi);
 
-        return (std::cos(r + D + p));
+        return {cos_phi, sin_phi};
     }
 
-    Float get_fmcw_weight_velocity_inverted(Float t, Float path_length, Float path_velocity) const {
+    std::pair<Float, Float> get_fmcw_weight_velocity_inverted(Float t, Float path_length, Float path_velocity, Float random_phase) const {
         Float n_f_c = m_f_c + m_B;
         Float n_B = -m_B;
 
@@ -82,7 +94,16 @@ public:
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
         Float p = 2 * M_PI * n_f_c * t_d * 1e3;
 
-        return (std::cos(r + D + p));
+        // return (std::cos(r + D + p + 2 * M_PI *random_phase));
+        Float final_phase = r + D + p + 2 * M_PI * random_phase;
+        
+        // Float sin_phi, cos_phi;
+        // math::sincos(final_phase, &sin_phi, &cos_phi);
+        Float sin_phi = std::sin(final_phase);
+        Float cos_phi = std::cos(final_phase);
+
+        return {cos_phi, sin_phi};
+
     }
 
     Float get_fmcw_weight_velocity_freq(Float path_length, Float path_velocity) const {
@@ -207,4 +228,5 @@ protected:
     bool m_use_collimated_light;
     bool m_use_amplitude;
     bool m_sqrt_pdf;
+    bool m_use_random_phase;
 };

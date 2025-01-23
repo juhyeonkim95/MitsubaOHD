@@ -520,26 +520,15 @@ public:
                 // put all time samples
 
                 // (1) initialize array
-                for(size_t j=0; j<(2 * m_M * SPECTRUM_SAMPLES + 2); j++){
-                    temp[j] = 0.0;
+                for(size_t k=0; k<(2 * m_M * SPECTRUM_SAMPLES + 2); k++){
+                    temp[k] = 0.0;
                 }
 
                 // (2) for each sampled path -> put to result
-                for (size_t j=0; j<results.size(); j++){
-                    auto[Li, path_pdf, path_length, path_velocity] = results.at(j);
+                for (size_t k=0; k<results.size(); k++){
+                    auto[Li, path_pdf, path_length, path_velocity] = results.at(k);
                     Li = Li * spec;
 
-                    if(m_use_amplitude){
-                        if(m_sqrt_pdf){
-                            for(size_t l=0; l<SPECTRUM_SAMPLES; l++){   
-                                if(path_pdf>0) Li[l] = std::sqrt(Li[l] * path_pdf) / path_pdf;
-                            }
-                        } else {
-                            for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                                Li[l] = std::sqrt(Li[l]);
-                            }
-                        }   
-                    }
                     Float f_up = get_fmcw_weight_velocity_freq(path_length, path_velocity);
                     Float f_down = get_fmcw_weight_velocity_inverted_freq(path_length, path_velocity);
                     
@@ -551,15 +540,20 @@ public:
                     // Float cos1 = np.cos(M_PI * 2 * p1);
                     // Float cos2 = np.cos(M_PI * 2 * p2);
 
+                    size_t idx11 = std::clamp(idx1 + 1, (size_t)0, m_M-1);
+                    size_t idx22 = std::clamp(idx2 + 1, (size_t)0, m_M-1);
+
                     // (3) put to each time samples
                     if(idx1 >= 0){
                         for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[idx1 * SPECTRUM_SAMPLES + l] += Li[l];
+                            temp[idx1 * SPECTRUM_SAMPLES + l] += Li[l] * (1-remainder1);
+                            temp[idx11 * SPECTRUM_SAMPLES + l] += Li[l] * remainder1;
                         }
                     }
                     if(idx2 >= 0){
                         for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[(m_M + idx2) * SPECTRUM_SAMPLES + l] += Li[l];
+                            temp[(m_M + idx2) * SPECTRUM_SAMPLES + l] += Li[l] * (1-remainder2);
+                            temp[(m_M + idx22) * SPECTRUM_SAMPLES + l] += Li[l] * remainder2;
                         }
                     }
                 }

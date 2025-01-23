@@ -461,8 +461,10 @@ public:
         if (!sensor->getFilm()->hasAlpha()) /* Don't compute an alpha channel if we don't have to */
             queryType &= ~RadianceQueryRecord::EOpacity;
 
-        Float *temp = (Float *) alloca(sizeof(Float) * (2 * m_M * SPECTRUM_SAMPLES + 2));
-
+        // sin cos / up down
+        Float *temp = (Float *) alloca(sizeof(Float) * (4 * m_M * SPECTRUM_SAMPLES + 2));
+        srand(time(NULL));
+        
         for (size_t i = 0; i<points.size(); ++i) {
             Point2i offset = Point2i(points[i]) + Vector2i(block->getOffset());
             if (stop)
@@ -475,6 +477,7 @@ public:
             for (size_t j = 0; j<sampler->getSampleCount(); j++) {
                 rRec.newQuery(queryType, sensor->getMedium());
                 Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
+                // Point2 samplePos(Point2(offset) + Vector2(0.5f));
 
                 if (needsApertureSample)
                     apertureSample = rRec.nextSample2D();
@@ -492,41 +495,51 @@ public:
                 // put all time samples
 
                 // (1) initialize array
-                for(size_t j=0; j<(2 * m_M * SPECTRUM_SAMPLES + 2); j++){
-                    temp[j] = 0.0;
+                for(size_t k=0; k<(4 * m_M * SPECTRUM_SAMPLES + 2);k++){
+                    temp[k] = 0.0;
                 }
 
                 // (2) for each sampled path -> put to result
-                for (size_t j=0; j<results.size(); j++){
-                    auto[Li, path_pdf, path_length, path_velocity] = results.at(j);
+                for (size_t k=0; k<results.size(); k++){
+                    auto[Li, path_pdf, path_length, path_velocity] = results.at(k);
                     Li = Li * spec;
-                    if(m_use_amplitude){
-                        if(m_sqrt_pdf){
-                            for(size_t l=0; l<SPECTRUM_SAMPLES; l++){   
-                                if(path_pdf>0) Li[l] = std::sqrt(Li[l] * path_pdf) / path_pdf;
-                            }
-                        } else {
-                            for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                                Li[l] = std::sqrt(Li[l]);
-                            }
-                        }   
+
+                    for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
+                        Li[l] = std::sqrt(Li[l]);  // sqrt(f(x_i) / p(x_i))
                     }
+
+                    // add random phase
+                    float r1 = 0;
+                    float r2 = 0;
+                    if(m_use_random_phase){
+                        r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+                        r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+                    }
+                    
                     // (3) put to each time samples
-                    for(size_t i=0; i<m_M; i++){
-                        Float t = (i + 0.5) / m_M * m_T;
-                        Float fmcw_weight = get_fmcw_weight_velocity(t, path_length, path_velocity);
-                        Float fmcw_weight_inverted = get_fmcw_weight_velocity_inverted(t, path_length, path_velocity);
+                    for(size_t ti=0; ti<m_M; ti++){
+                        Float t = (ti + 0.5) / m_M * m_T;
+
+                        auto [cos1, sin1] = get_fmcw_weight_velocity(t, path_length, path_velocity, r1);
+                        auto [cos2, sin2] = get_fmcw_weight_velocity_inverted(t, path_length, path_velocity, r2);
+
                         for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[i * SPECTRUM_SAMPLES + l] += fmcw_weight * Li[l];
+                            temp[ti * SPECTRUM_SAMPLES + l] += cos1 * Li[l];
                         }
                         for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[(m_M + i) * SPECTRUM_SAMPLES + l] += fmcw_weight_inverted * Li[l];
+                            temp[(m_M + ti) * SPECTRUM_SAMPLES + l] += cos2 * Li[l];
+                        }
+                        for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
+                            temp[(2 * m_M + ti) * SPECTRUM_SAMPLES + l] += sin1 * Li[l];
+                        }
+                        for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
+                            temp[(3 * m_M + ti) * SPECTRUM_SAMPLES + l] += sin2 * Li[l];
                         }
                     }
                 }
 
-                temp[2 * m_M * SPECTRUM_SAMPLES] = rRec.alpha;
-                temp[2 * m_M * SPECTRUM_SAMPLES + 1] = 1.0f;
+                temp[4 * m_M * SPECTRUM_SAMPLES] = rRec.alpha;
+                temp[4 * m_M * SPECTRUM_SAMPLES + 1] = 1.0f;
                 block->put(samplePos, temp);
                 sampler->advance();
             }
