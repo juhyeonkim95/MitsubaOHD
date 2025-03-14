@@ -40,6 +40,9 @@ public:
     static ref<Bitmap> renderDirectComponent(Scene *scene, int sceneResID,
         int sensorResID, RenderQueue *queue, const RenderJob *job,
         size_t directSamples);
+    static ref<Bitmap> renderDirectComponentTransient(Scene *scene, int sceneResID,
+        int sensorResID, RenderQueue *queue, const RenderJob *job,
+        size_t directSamples, Float targetDist, Float windowDist);
 
     /**
      * \brief Execute the first pass of a 2-pass MLT scheme.

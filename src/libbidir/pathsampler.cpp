@@ -213,10 +213,13 @@ void PathSampler::sampleSplats(const Point2i &offset, SplatList &list) {
                         /* Attempt to connect the two endpoints, which could result in
                            the creation of additional vertices (index-matched boundaries etc.) */
                         int interactions = remaining;
+                        
                         if (value.isZero() || !connectionEdge.pathConnectAndCollapse(
                                 m_scene, vsEdge, vs, vt, vtEdge, interactions))
                             continue;
-
+                        // value *= std::max(1.0 - std::abs(m_emitterSubpath.distance() + m_sensorSubpath.distance() + connectionEdge.length - 10.0) / 0.1, 0.0);
+                        // if (value.isZero())
+                        //     continue;
                         depth += interactions;
 
                         if (m_excludeDirectIllum && depth <= 2)
@@ -340,17 +343,19 @@ void PathSampler::samplePaths(const Point2i &offset, PathCallback &callback) {
              *radianceWeights  = (Spectrum *) alloca(m_sensorSubpath.vertexCount()  * sizeof(Spectrum));
 
     importanceWeights[0] = radianceWeights[0] = Spectrum(1.0f);
-    for (size_t i=1; i<m_emitterSubpath.vertexCount(); ++i)
+    for (size_t i=1; i<m_emitterSubpath.vertexCount(); ++i){
         importanceWeights[i] = importanceWeights[i-1] *
             m_emitterSubpath.vertex(i-1)->weight[EImportance] *
             m_emitterSubpath.vertex(i-1)->rrWeight *
             m_emitterSubpath.edge(i-1)->weight[EImportance];
+        }
 
-    for (size_t i=1; i<m_sensorSubpath.vertexCount(); ++i)
+    for (size_t i=1; i<m_sensorSubpath.vertexCount(); ++i){
         radianceWeights[i] = radianceWeights[i-1] *
             m_sensorSubpath.vertex(i-1)->weight[ERadiance] *
             m_sensorSubpath.vertex(i-1)->rrWeight *
             m_sensorSubpath.edge(i-1)->weight[ERadiance];
+            }
 
     PathVertex tempEndpoint, tempSample, vsTemp, vtTemp;
     PathEdge tempEdge, connectionEdge;
@@ -388,6 +393,7 @@ void PathSampler::samplePaths(const Point2i &offset, PathCallback &callback) {
 
             /* Will receive the path weight of the (s, t)-connection */
             Spectrum value;
+            Float dist = 0.0;
 
             /* Measure associated with the connection vertices */
             EMeasure vsMeasure = EArea, vtMeasure = EArea;
@@ -462,10 +468,11 @@ void PathSampler::samplePaths(const Point2i &offset, PathCallback &callback) {
             /* Attempt to connect the two endpoints, which could result in
                the creation of additional vertices (index-matched boundaries etc.) */
             m_connectionSubpath.release(m_pool);
+            
             if (value.isZero() || !PathEdge::pathConnect(m_scene, vsEdge,
                     vs, m_connectionSubpath, vt, vtEdge, remaining, m_pool))
                 continue;
-
+            
             depth += (int) m_connectionSubpath.vertexCount();
 
             if (m_excludeDirectIllum && depth <= 2)
@@ -473,6 +480,14 @@ void PathSampler::samplePaths(const Point2i &offset, PathCallback &callback) {
 
             PathEdge connectionEdge;
             m_connectionSubpath.collapseTo(connectionEdge);
+            // value *= std::max(1.0 - std::abs(m_emitterSubpath.distance() + m_sensorSubpath.distance() + m_connectionSubpath.distance() - 10.0) / 0.1, 0.0);
+            // if (value.isZero())
+            //     continue;
+            // else{
+            //     printf("Distance Sampled %.4f\n", m_emitterSubpath.distance() + m_sensorSubpath.distance() + m_connectionSubpath.distance());
+            // }
+
+            
 
             /* Account for the terms of the measurement contribution
                function that are coupled to the connection edge */
@@ -695,13 +710,13 @@ static void reconstructCallback(const PathSeed &seed, const Bitmap *importanceMa
     }
 }
 
-void PathSampler::reconstructPath(const PathSeed &seed, const Bitmap *importanceMap, Path &result) {
+void PathSampler::reconstructPath(const PathSeed &seed, const Bitmap *importanceMap, Path &result, int offset) {
     ReplayableSampler *rplSampler = static_cast<ReplayableSampler *>(m_sensorSampler.get());
     Assert(result.length() == 0);
 
     /* Generate the initial sample by replaying the seeding random
        number stream at the appropriate position. */
-    rplSampler->setSampleIndex(seed.sampleIndex);
+    rplSampler->setSampleIndex(seed.sampleIndex + offset);
 
     PathCallback callback = boost::bind(&reconstructCallback,
         boost::cref(seed), importanceMap,

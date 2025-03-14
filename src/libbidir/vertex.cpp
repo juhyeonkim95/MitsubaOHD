@@ -378,7 +378,6 @@ int PathVertex::sampleSensor(const Scene *scene, Sampler *sampler,
         if (v2->isOnSurface())
             v1->pdf[ERadiance] *= absDot(ray.d, v2->getGeometricNormal());
     }
-
     return 2;
 }
 

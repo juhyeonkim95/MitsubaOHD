@@ -61,3 +61,8 @@ mitsuba.*.log
 *.npy
 /doppler_things
 /fmcw_tutorial/results
+/build
+/build_double/
+/build_float_rgb
+/build_double_rgb
+/src_original

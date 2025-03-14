@@ -195,6 +195,7 @@ Float LensPerturbation::Q(const Path &source, const Path &proposal,
             weight /= pdfMediumPerturbation(source.vertex(i-1),
                     source.edge(i-1), edge);
     }
+    // weight *= std::max(1.0 - std::abs(proposal.distance(m) - 10.0) / 0.1, 0.0);
 
     const Float lumWeight = weight.getLuminance();
     if (lumWeight <= RCPOVERFLOW)

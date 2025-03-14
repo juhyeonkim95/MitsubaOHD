@@ -183,7 +183,7 @@ public:
      * to the indicated position and recreates the associated path.
      */
     void reconstructPath(const PathSeed &seed,
-        const Bitmap *importanceMap, Path &result);
+        const Bitmap *importanceMap, Path &result, int offset=0);
 
     /// Return the underlying memory pool
     inline MemoryPool &getMemoryPool() { return m_pool; }

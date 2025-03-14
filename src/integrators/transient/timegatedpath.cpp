@@ -18,7 +18,6 @@
 
 #include <mitsuba/render/scene.h>
 #include <mitsuba/core/statistics.h>
-#include "fmcw_interface.h"
 
 MTS_NAMESPACE_BEGIN
 
@@ -108,26 +107,25 @@ static StatsCounter avgPathLength("Path tracer", "Average path length", EAverage
  *    one of the photon mappers may be preferable.
  * }
  */
-class MIFMCWDynamicPathTracer : public MonteCarloIntegrator, public FMCWInterface {
+class MITimeGatedPathTracer : public MonteCarloIntegrator {
 public:
-    MIFMCWDynamicPathTracer(const Properties &props)
-        : MonteCarloIntegrator(props), FMCWInterface(props) {}
+    MITimeGatedPathTracer(const Properties &props)
+        : MonteCarloIntegrator(props) { 
+            m_targetDist = props.getFloat("targetDist", 10.0);
+            m_windowDist = props.getFloat("windowDist", 0.1);
+            m_minDepth = props.getInteger("minDepth", 0);
+        }
 
     /// Unserialize from a binary data stream
-    MIFMCWDynamicPathTracer(Stream *stream, InstanceManager *manager)
+    MITimeGatedPathTracer(Stream *stream, InstanceManager *manager)
         : MonteCarloIntegrator(stream, manager) { }
 
     Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
-        NotImplementedError("Li");
-    }
-
-    Spectrum Li_helper(const RayDifferential &r, RadianceQueryRecord &rRec) const {
         /* Some aliases and local variables */
         const Scene *scene = rRec.scene;
         Intersection &its = rRec.its;
         RayDifferential ray(r);
         Spectrum Li(0.0f);
-
         bool scattered = false;
 
         /* Perform the first ray intersection (or ignore if the
@@ -137,30 +135,28 @@ public:
 
         Spectrum throughput(1.0f);
         Float eta = 1.0f;
-
-        Float path_length = 0;
-        path_length += its.t * eta;
+        Float distance = its.t;
 
         while (rRec.depth <= m_maxDepth || m_maxDepth < 0) {
             if (!its.isValid()) {
                 /* If no intersection could be found, potentially return
                    radiance from a environment luminaire if it exists */
-                // if ((rRec.type & RadianceQueryRecord::EEmittedRadiance)
-                //     && (!m_hideEmitters || scattered))
-                //     Li += throughput * scene->evalEnvironment(ray);
+                if ((rRec.type & RadianceQueryRecord::EEmittedRadiance)
+                    && (!m_hideEmitters || scattered))
+                    Li += throughput * scene->evalEnvironment(ray);
                 break;
             }
 
             const BSDF *bsdf = its.getBSDF(ray);
 
-            // /* Possibly include emitted radiance if requested */
-            // if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance)
-            //     && (!m_hideEmitters || scattered))
-            //     Li += throughput * its.Le(-ray.d);
+            /* Possibly include emitted radiance if requested */
+            if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance)
+                && (!m_hideEmitters || scattered) && rRec.depth >= m_minDepth)
+                Li += throughput * its.Le(-ray.d)* std::max(1.0 - std::abs(distance - m_targetDist) / m_windowDist, 0.0);
 
-            // /* Include radiance from a subsurface scattering model if requested */
-            // if (its.hasSubsurface() && (rRec.type & RadianceQueryRecord::ESubsurfaceRadiance))
-            //     Li += throughput * its.LoSub(scene, rRec.sampler, -ray.d, rRec.depth);
+            /* Include radiance from a subsurface scattering model if requested */
+            if (its.hasSubsurface() && (rRec.type & RadianceQueryRecord::ESubsurfaceRadiance))
+                Li += throughput * its.LoSub(scene, rRec.sampler, -ray.d, rRec.depth);
 
             if ((rRec.depth >= m_maxDepth && m_maxDepth > 0)
                 || (m_strictNormals && dot(ray.d, its.geoFrame.n)
@@ -203,14 +199,10 @@ public:
 
                         /* Weight using the power heuristic */
                         Float weight = miWeight(dRec.pdf, bsdfPdf);
-
-                        Float em_path_length = path_length + dRec.dist;
-
-                        Spectrum Li_temp = throughput * value * bsdfVal * weight;
-
-                        Float em_modulation_weight = get_fmcw_weight(ray.time, em_path_length);
-                        // printf("TIME: %.2fus!\n",  ray.time);
-                        Li += Li_temp * em_modulation_weight;
+                        weight *= std::max(1.0 - std::abs(distance + dRec.dist - m_targetDist) / m_windowDist, 0.0);
+                        if(rRec.depth + 1 >= m_minDepth){
+                            Li += throughput * value * bsdfVal * weight;
+                        }
                     }
                 }
             }
@@ -262,12 +254,12 @@ public:
                     break;
                 }
             }
+            distance += its.t;
 
             /* Keep track of the throughput and relative
                refractive index along the path */
             throughput *= bsdfWeight;
             eta *= bRec.eta;
-            path_length += its.t * eta;
 
             /* If a luminaire was hit, estimate the local illumination and
                weight using the power heuristic */
@@ -277,7 +269,12 @@ public:
                    implemented direct illumination sampling technique */
                 const Float lumPdf = (!(bRec.sampledType & BSDF::EDelta)) ?
                     scene->pdfEmitterDirect(dRec) : 0;
-                // Li += throughput * value * miWeight(bsdfPdf, lumPdf);
+
+                value *= std::max(1.0 - std::abs(distance - m_targetDist) / m_windowDist, 0.0);
+
+                if(rRec.depth + 1 >= m_minDepth){
+                    Li += throughput * value * miWeight(bsdfPdf, lumPdf);
+                }
             }
 
             /* ==================================================================== */
@@ -322,7 +319,7 @@ public:
 
     std::string toString() const {
         std::ostringstream oss;
-        oss << "MIFMCWDynamicPathTracer[" << endl
+        oss << "MITimeGatedPathTracer[" << endl
             << "  maxDepth = " << m_maxDepth << "," << endl
             << "  rrDepth = " << m_rrDepth << "," << endl
             << "  strictNormals = " << m_strictNormals << endl
@@ -330,92 +327,13 @@ public:
         return oss.str();
     }
 
-    // Overloaded
-    void renderBlock(const Scene *scene,
-        const Sensor *sensor, Sampler *sampler, ImageBlock *block,
-        const bool &stop, const std::vector< TPoint2<uint8_t> > &points) const {
-       
-        Float diffScaleFactor = 1.0f /
-            std::sqrt((Float) sampler->getSampleCount());
-
-        bool needsApertureSample = sensor->needsApertureSample();
-        bool needsTimeSample = sensor->needsTimeSample();
-
-        RadianceQueryRecord rRec(scene, sampler);
-        Point2 apertureSample(0.5f);
-        Float timeSample = 0.5f;
-        RayDifferential sensorRay;
-
-        block->clear();
-
-        uint32_t queryType = RadianceQueryRecord::ESensorRay;
-
-        if (!sensor->getFilm()->hasAlpha()) /* Don't compute an alpha channel if we don't have to */
-            queryType &= ~RadianceQueryRecord::EOpacity;
-
-        Float *temp = (Float *) alloca(sizeof(Float) * (m_M * SPECTRUM_SAMPLES + 2));
-        std::vector<Spectrum> Lis(m_M);
-
-        for (size_t i = 0; i<points.size(); ++i) {
-            Point2i offset = Point2i(points[i]) + Vector2i(block->getOffset());
-            if (stop)
-                break;
-
-            sampler->generate(offset);
-            for (size_t j = 0; j<sampler->getSampleCount(); j++) {
-
-                Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
-                sampler->saveState();
-
-                for(size_t m=0; m < m_M; m++){
-                    sampler->loadSavedState();
-                    rRec.newQuery(queryType, sensor->getMedium());
-
-                    Float time = (m + 0.5f) / m_M * m_T;
-
-                    if (needsApertureSample)
-                        apertureSample = rRec.nextSample2D();
-                    //if (needsTimeSample)
-                    //    timeSample = rRec.nextSample1D();
-
-                    Spectrum spec = sensor->sampleRayDifferential(
-                        sensorRay, samplePos, apertureSample, time);
-
-                    sensorRay.scaleDifferential(diffScaleFactor);
-                    sensorRay.setTime(time);
-
-                    spec *= Li_helper(sensorRay, rRec);
-                    Lis[m] = spec;
-                    //sampler->advance();
-                }
-                for(size_t m=0; m < m_M; m++){
-                    sampler->advance();
-                }
-
-                int array_offset = 0;
-                for(size_t i=0; i<m_M; i++){
-                    Spectrum result = Lis.at(i);
-                    for (int l = 0; l<SPECTRUM_SAMPLES; ++l)
-                        temp[array_offset++] = result[l];
-                }
-                temp[array_offset++] = rRec.alpha;
-                temp[array_offset] = 1.0f;
-                block->put(samplePos, temp);
-            }
-        }
-    }
-
     MTS_DECLARE_CLASS()
-
 private:
-    Float m_time;
-    Float m_B;
-    Float m_T;
-    Float m_f_c;
-    Float m_R_min;
-    size_t m_M;
+    Float m_targetDist;
+    Float m_windowDist;
+    int m_minDepth;
 };
 
-MTS_IMPLEMENT_CLASS_S(MIFMCWDynamicPathTracer, false, MonteCarloIntegrator)
-MTS_EXPORT_PLUGIN(MIFMCWDynamicPathTracer, "MI path tracer");
+MTS_IMPLEMENT_CLASS_S(MITimeGatedPathTracer, false, MonteCarloIntegrator)
+MTS_EXPORT_PLUGIN(MITimeGatedPathTracer, "MI path tracer");
 MTS_NAMESPACE_END

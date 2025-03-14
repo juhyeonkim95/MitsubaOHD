@@ -93,6 +93,74 @@ ref<Bitmap> BidirectionalUtils::renderDirectComponent(Scene *scene, int sceneRes
     }
 }
 
+ref<Bitmap> BidirectionalUtils::renderDirectComponentTransient(Scene *scene, int sceneResID,
+        int sensorResID, RenderQueue *queue, const RenderJob *job, size_t directSamples, Float targetDist, Float windowDist) {
+    ref<PluginManager> pluginMgr = PluginManager::getInstance();
+    ref<Scheduler> scheduler = Scheduler::getInstance();
+    const Film *film = scene->getFilm();
+    Integrator *integrator = scene->getIntegrator();
+    /* Render the direct illumination component separately */
+    ref<Bitmap> directImage = new Bitmap(Bitmap::ERGBA, Bitmap::EFloat32, film->getCropSize());
+    bool hasMedia = scene->getMedia().size() > 0;
+    bool hasDOF = scene->getSensor()->needsApertureSample();
+    size_t pixelSamples = directSamples;
+    Properties integratorProps(hasMedia ? "volpath" : "direct");
+
+    if (hasMedia || hasDOF) {
+        integratorProps.setInteger("maxDepth", 2);
+    } else {
+        /* No participating media / DoF -> we can more carefully
+           distribute samples between shading and visibility */
+        int shadingSamples = 1;
+        while (pixelSamples > 8) {
+            pixelSamples /= 2;
+            shadingSamples *= 2;
+        }
+        integratorProps.setSize("shadingSamples", shadingSamples);
+        integratorProps.setFloat("targetDist", targetDist);
+        integratorProps.setFloat("windowDist", windowDist);
+    }
+
+    ref<Integrator> directIntegrator = static_cast<Integrator *> (pluginMgr->
+            createObject(Integrator::m_theClass, integratorProps));
+    /* Create a low discrepancy sampler instance for every core */
+    Properties samplerProps("ldsampler");
+    samplerProps.setSize("sampleCount", pixelSamples);
+    ref<Sampler> ldSampler = static_cast<Sampler *> (pluginMgr->
+            createObject(Sampler::m_theClass, samplerProps));
+    ldSampler->configure();
+    directIntegrator->configure();
+    directIntegrator->configureSampler(scene, ldSampler);
+    std::vector<SerializableObject *> samplers(scheduler->getCoreCount());
+    for (size_t i=0; i<scheduler->getCoreCount(); ++i) {
+        ref<Sampler> clonedSampler = ldSampler->clone();
+        clonedSampler->incRef();
+        samplers[i] = clonedSampler.get();
+    }
+    int ldSamplerResID = scheduler->registerMultiResource(samplers);
+    for (size_t i=0; i<scheduler->getCoreCount(); ++i)
+        samplers[i]->decRef();
+
+    integrator->incRef();
+    scene->setIntegrator(directIntegrator);
+    bool success = directIntegrator->render(scene, queue, job,
+        sceneResID, sensorResID, ldSamplerResID);
+    scene->setIntegrator(integrator);
+    integrator->decRef();
+    scheduler->unregisterResource(ldSamplerResID);
+
+    if (success) {
+        ref<Bitmap> bitmap = new Bitmap(
+            Bitmap::ESpectrum, Bitmap::EFloat,
+            film->getCropSize());
+        film->develop(Point2i(0, 0),
+            film->getCropSize(), Point2i(0, 0), bitmap);
+        return bitmap;
+    } else {
+        return NULL;
+    }
+}
+
 ref<Bitmap> BidirectionalUtils::mltLuminancePass(Scene *scene, int sceneResID,
         RenderQueue *queue, int sizeFactor, ref<RenderJob> &nestedJob) {
     ref<PluginManager> pluginMgr = PluginManager::getInstance();

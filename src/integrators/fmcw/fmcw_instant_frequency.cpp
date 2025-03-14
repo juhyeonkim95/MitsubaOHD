@@ -139,7 +139,7 @@ public:
         size_t idx_int = (size_t)(idx);
         idx_int = std::clamp(idx_int, (size_t)0, m_M-1);
         Float float_idx = idx - idx_int;
-        float_idx = std::clamp(float_idx, 0.0, 1.0);
+        float_idx = std::clamp(float_idx, 0.0f, 1.0f);
         return {idx_int, float_idx};
     }
 

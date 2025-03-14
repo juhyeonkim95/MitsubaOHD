@@ -1,6 +1,5 @@
-# Mitsuba0.6 FMCW Renderer
+# Mitsuba0.6 OHD Renderer
 This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection" (SIGGRAPH 2025 paper id 247)
-This repository serves FMCW simulation.
 
 ## Install
 To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
@@ -8,7 +7,7 @@ To compile, follow the original Mitsuba compliation guide at [here](https://gith
 Instead of config, please use double precision and mono-channel config (`config_double_single.py`).
 
 ## Parameter Explanation
-New integrators are added in `src/integrators/fmcw` folder, for FMCW rendering.
+New integrators are added in `src/integrators/fmcw` folder, for OHD rendering. (naming will be updated later)
 
 ### Integrator Type
 * `fmcw_instant`: time-domain rendering. It outputs [H x W x M] where M is FFT sample number.

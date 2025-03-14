@@ -222,20 +222,29 @@ Float BidirectionalMutator::Q(const Path &source, const Path &proposal,
     Spectrum *importanceWeights = (Spectrum *) alloca(ka * sizeof(Spectrum)),
              *radianceWeights  = (Spectrum *) alloca(ka * sizeof(Spectrum));
 
+
+    Float *dist1 = (Float *) alloca(ka * sizeof(Float)),
+        *dist2  = (Float *) alloca(ka * sizeof(Float));
+    dist1[0] = 0.0;
+    dist2[0] = 0.0;
+    
     /* Compute importance transport weights along the subpath */
     importanceWeights[0] = Spectrum(1.0f);
-    for (int s=1; s<ka; ++s)
+    for (int s=1; s<ka; ++s){
         importanceWeights[s] = importanceWeights[s-1] *
             proposal.vertex(l+s-1)->weight[EImportance] *
             proposal.edge(l+s-1)->weight[EImportance];
+        dist1[s] = dist1[s-1] + proposal.edge(l+s-1)->length;
+        }
 
     /* Compute radiance transport weights along the subpath */
     radianceWeights[0] = Spectrum(1.0f);
-    for (int t=1; t<ka; ++t)
+    for (int t=1; t<ka; ++t){
         radianceWeights[t] = radianceWeights[t-1] *
             proposal.vertex(mPrime-t+1)->weight[ERadiance] *
             proposal.edge(mPrime-t)->weight[ERadiance];
-
+        dist2[t] = dist2[t-1] + proposal.edge(mPrime-t)->length;
+    }
     int sMin = 0, sMax = ka-1;
     if (l == 0 && m_scene->hasDegenerateEmitters())
         ++sMin;
@@ -257,6 +266,8 @@ Float BidirectionalMutator::Q(const Path &source, const Path &proposal,
             * radianceWeights[t]
             * edge->evalCached(vs, vt, PathEdge::EEverything)
             * muRec.weight;
+
+        // weight *= std::max(1.0 - std::abs(dist1[s] + dist2[t] + edge->length - 9.0) / 0.1, 0.0);
 
         Float luminance = weight.getLuminance();
 

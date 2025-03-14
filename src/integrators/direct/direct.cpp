@@ -105,6 +105,9 @@ public:
          * visible emitters will not be included in the rendered image */
         m_hideEmitters = props.getBoolean("hideEmitters", false);
         Assert(m_emitterSamples + m_bsdfSamples > 0);
+
+        m_targetDist = props.getFloat("targetDist", 10.0);
+        m_windowDist = props.getFloat("windowDist", 0.1);
     }
 
     /// Unserialize from a binary data stream
@@ -162,9 +165,11 @@ public:
                 return Spectrum(0.0f);
         }
 
+        Float distance = its.t;
+
         /* Possibly include emitted radiance if requested */
         if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance) && !m_hideEmitters)
-            Li += its.Le(-ray.d);
+            Li += its.Le(-ray.d) * std::max(1.0 - std::abs(distance - m_targetDist) / m_windowDist, 0.0);
 
         /* Include radiance from a subsurface scattering model if requested */
         if (its.hasSubsurface() && (rRec.type & RadianceQueryRecord::ESubsurfaceRadiance))
@@ -235,9 +240,10 @@ public:
                         Float bsdfPdf = emitter->isOnSurface() ? bsdf->pdf(bRec) : 0;
 
                         /* Weight using the power heuristic */
-                        const Float weight = miWeight(dRec.pdf * fracLum,
+                        Float weight = miWeight(dRec.pdf * fracLum,
                                 bsdfPdf * fracBSDF) * weightLum;
 
+                        weight *= std::max(1.0 - std::abs(distance + dRec.dist - m_targetDist) / m_windowDist, 0.0);
                         Li += value * bsdfVal * weight;
                     }
                 }
@@ -299,8 +305,10 @@ public:
                 scene->pdfEmitterDirect(dRec) : 0;
 
             /* Weight using the power heuristic */
-            const Float weight = miWeight(bsdfPdf * fracBSDF,
+            Float weight = miWeight(bsdfPdf * fracBSDF,
                 lumPdf * fracLum) * weightBSDF;
+
+            weight *= std::max(1.0 - std::abs(distance + bsdfIts.t - m_targetDist) / m_windowDist, 0.0);
 
             Li += value * bsdfVal * weight;
         }
@@ -331,6 +339,7 @@ private:
     Float m_weightBSDF, m_weightLum;
     bool m_strictNormals;
     bool m_hideEmitters;
+    Float m_targetDist, m_windowDist;
 };
 
 MTS_IMPLEMENT_CLASS_S(MIDirectIntegrator, false, SamplingIntegrator)

@@ -146,7 +146,7 @@ public:
         size_t idx_int = (size_t)(idx);
         idx_int = std::clamp(idx_int, (size_t)0, m_bin-1);
         Float float_idx = idx - idx_int;
-        float_idx = std::clamp(float_idx, 0.0, 1.0);
+        float_idx = std::clamp(float_idx, 0.0f, 1.0f);
         return {idx_int, float_idx};
     }
     
@@ -405,7 +405,6 @@ public:
                 
                 Spectrum Li = throughput * value * miWeight(bsdfPdf, lumPdf);
                 results.push_back({Li, path_pdf, path_length});
-                // put_Li_to_block(Li, em_path_length, block, sampled_pos, rRec.alpha);
             }
 
             /* ==================================================================== */
@@ -497,8 +496,6 @@ public:
                 jitter = jitter * m_fov_error + Vector2(0.5);
                 Point2 samplePos = Point2(offset) + jitter;
 
-                // Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
-
                 if (needsApertureSample)
                     apertureSample = rRec.nextSample2D();
                 if (needsTimeSample)
@@ -509,32 +506,20 @@ public:
 
                 sensorRay.scaleDifferential(diffScaleFactor);
 
-                // spec *= Li(sensorRay, rRec);
-
                 std::vector<std::tuple<Spectrum, Float, Float>> results = Li_helper(sensorRay, rRec);
 
                 for(size_t j=0; j<(SPECTRUM_SAMPLES * (m_bin) + 2); j++){
                     temp[j] = 0.0;
                 }
 
-                // std::fill( temp, temp + (SPECTRUM_SAMPLES * (m_bin) + 2), 0.0);
-
                 for (size_t j=0; j<results.size(); j++){
                     auto[Li, path_pdf, path_length] = results.at(j);
                     Li = Li * spec;
-                    auto[idx, remainder] = path_length_to_index(path_length);
-                    // printf("INDEX %d\n", idx);
+                    auto[idx1, remainder] = path_length_to_index(path_length);
+                    size_t idx2 = std::clamp(idx1 + 1, (size_t)0, m_bin-1);
                     for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                        if(m_use_amplitude){
-                            if(m_sqrt_pdf){
-                                if(path_pdf > 0)
-                                    temp[idx * SPECTRUM_SAMPLES + l] += std::sqrt(Li[l] * path_pdf) / path_pdf;
-                            } else {
-                                temp[idx * SPECTRUM_SAMPLES + l] += std::sqrt(Li[l]);
-                            }
-                        } else {
-                            temp[idx * SPECTRUM_SAMPLES + l] += Li[l];
-                        }
+                        temp[idx1 * SPECTRUM_SAMPLES + l] += Li[l] * (1 - remainder);
+                        temp[idx2 * SPECTRUM_SAMPLES + l] += Li[l] * remainder;
                     }
                 }
                 temp[SPECTRUM_SAMPLES * m_bin] = rRec.alpha;

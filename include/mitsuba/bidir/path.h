@@ -228,6 +228,26 @@ public:
         return (int) m_edges.size();
     }
 
+    /**
+     * \brief Return the float length of the path. This is just the
+     * number of edges.
+     */
+    inline Float distance() const {
+        Float distance = 0;
+        for(int i=0; i<edgeCount(); i++){
+            distance += m_edges.at(i)->length;
+        }
+        return distance;
+    }
+
+    inline Float distance(int k) const {
+        Float distance = 0;
+        for(int i=0; i<k; i++){
+            distance += m_edges.at(i)->length;
+        }
+        return distance;
+    }
+
     /// Return an vertex by its index
     inline PathVertexPtr &vertex(size_t index) {
         #if MTS_BD_DEBUG == 1
@@ -319,14 +339,19 @@ public:
      */
     inline Spectrum getPrefixSuffixWeight(int l, int m) const {
         Spectrum weight(1.0f);
+        Float dist = 0.0;
 
-        for (int s=0; s<l; ++s)
+        for (int s=0; s<l; ++s){
             weight *= m_vertices[s]->weight[EImportance]
                 * m_edges[s]->weight[EImportance];
+            dist += m_edges[s]->length;
+        }
 
-        for (int t=length(); t>m; --t)
+        for (int t=length(); t>m; --t){
             weight *= m_vertices[t]->weight[ERadiance]
                 * m_edges[t-1]->weight[ERadiance];
+            dist += m_edges[t-1]->length;
+        }
 
         return weight;
     }
@@ -373,6 +398,7 @@ public:
             * m_vertices[k]->weight[ERadiance]
             * m_vertices[k-1]->weight[ERadiance]
             * m_edges[k-1]->weight[ERadiance];
+        // weight *= std::max(1.0 - std::abs(distance() - 10.0) / 0.1, 0.0);
 
         Float lum = weight.getLuminance();
         return lum != 0.0f ? (weight / lum) : Spectrum(0.0f);
