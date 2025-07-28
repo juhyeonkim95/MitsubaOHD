@@ -2,6 +2,8 @@
 
 ### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150)
 
+![visualization](assets/teaser.png)
+
 This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection" by 
 [Juhyeon Kim](https://juhyeonkim.netlify.app/), 
 [Craig Benko](http://craigbenko.com/), 
