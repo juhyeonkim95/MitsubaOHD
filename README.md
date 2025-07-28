@@ -12,7 +12,7 @@ This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rend
 [Zeb Barber](https://www.linkedin.com/in/zeb-barber-a03020127/), 
 [Wojciech Jarosz](https://cs.dartmouth.edu/~wjarosz/), 
 [Adithya Pediredla](https://sites.google.com/view/adithyapediredla/)
-(SIGGRAPH 2025, journal paper).
+(SIGGRAPH 2025, journal paper, 🏆 Honorable mention).
 
 ## Install
 To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
