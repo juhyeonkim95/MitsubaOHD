@@ -1,5 +1,16 @@
 # Mitsuba0.6 OHD Renderer
-This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection" (SIGGRAPH 2025 paper id 247)
+
+### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150)
+
+This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection" by 
+[Juhyeon Kim](https://juhyeonkim.netlify.app/), 
+[Craig Benko](http://craigbenko.com/), 
+[Magnus Wrenninge](https://scholar.google.se/citations?user=aa85HZgAAAAJ&hl=en), 
+[Ryusuke Villemin](https://www.linkedin.com/in/ryusuke-v-04649b1/), 
+[Zeb Barber](https://www.linkedin.com/in/zeb-barber-a03020127/), 
+[Wojciech Jarosz](https://cs.dartmouth.edu/~wjarosz/), 
+[Adithya Pediredla](https://sites.google.com/view/adithyapediredla/)
+(SIGGRAPH 2025, journal paper).
 
 ## Install
 To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
