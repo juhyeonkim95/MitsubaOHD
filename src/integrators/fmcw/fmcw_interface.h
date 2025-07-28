@@ -14,7 +14,7 @@ public:
             Float wavelength = props.getFloat("wavelength", 1550); // nm (1e-9)
             m_f_c = 3e8 / wavelength;
         } else{
-            m_f_c = props.getFloat("f_c", 77); // GHz (1e9)
+            m_f_c = props.getFloat("f_c", 193414); // GHz (1e9)
         }
         m_B = props.getFloat("B", 1);  // GHz (1e9)
         m_T = props.getFloat("T", 10);  // micro second (1e-6)
@@ -43,13 +43,12 @@ public:
         if(m_use_collimated_light){
                 printf("\tm_use_collimated_light: True\n");
         } else { printf("\tm_use_collimated_light: False\n");}
-
-        if(m_use_amplitude){
-                printf("\tm_use_amplitude: True\n");
-        } else { printf("\tm_use_amplitude: False\n");}
-        if(m_sqrt_pdf){
-                printf("\tm_sqrt_pdf: True\n");
-        } else { printf("\tm_sqrt_pdf: False\n");}
+        // if(m_use_amplitude){
+        //         printf("\tm_use_amplitude: True\n");
+        // } else { printf("\tm_use_amplitude: False\n");}
+        // if(m_sqrt_pdf){
+        //         printf("\tm_sqrt_pdf: True\n");
+        // } else { printf("\tm_sqrt_pdf: False\n");}
     };
 
     std::pair<Float, Float> get_fmcw_weight_velocity(Float t, Float path_length, Float path_velocity, Float random_phase) const {

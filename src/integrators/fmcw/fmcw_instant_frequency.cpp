@@ -502,7 +502,11 @@ public:
                 //     m_laser_mrad 
                 // }
 
-                Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
+                // Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
+
+                Vector2 jitter = Vector2(rRec.nextSample2D()) * 2.0 - Vector2(1.0);
+                jitter = jitter * m_fov_error + Vector2(0.5);
+                Point2 samplePos = Point2(offset) + jitter;
 
                 if (needsApertureSample)
                     apertureSample = rRec.nextSample2D();
