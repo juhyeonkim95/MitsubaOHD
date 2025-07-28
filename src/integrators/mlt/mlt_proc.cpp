@@ -57,8 +57,8 @@ public:
     }
 
     ref<WorkResult> createWorkResult() const {
-        return new ImageBlock(Bitmap::EMultiChannel,
-            m_film->getCropSize(), m_film->getReconstructionFilter(), (int) (SPECTRUM_SAMPLES * 2));
+        return new ImageBlock(Bitmap::ESpectrum,
+            m_film->getCropSize(), m_film->getReconstructionFilter());
     }
 
     void prepare() {
@@ -124,7 +124,6 @@ public:
         /// Reconstruct the seed path
         m_pathSampler->reconstructPath(wu->getSeed(), m_config.importanceMap, *current);
         relWeight = current->getRelativeWeight();
-        printf("Relweight, Dist %.4f, %.4f, %.4f, %.4f\n", relWeight[0], relWeight[1], relWeight[2], current->distance());
         BDAssert(!relWeight.isZero());
 
         DiscreteDistribution suitabilities(m_mutators.size());
@@ -142,9 +141,6 @@ public:
             std::ostringstream oss;
             Path backup;
         #endif
-        Float *temp = (Float *) alloca(sizeof(Float) * (SPECTRUM_SAMPLES * 2));
-
-
         for (size_t mutationCtr=0; mutationCtr < m_config.nMutations
                 && !stop; ++mutationCtr) {
             if (wu->getTimeout() > 0 && (mutationCtr % 8192) == 0 &&
@@ -260,15 +256,8 @@ public:
                 if (a == 1 || m_sampler->next1D() < a) {
                     current->release(muRec.l, muRec.m+1, *m_pool);
                     Spectrum value = relWeight * accumulatedWeight;
-                    Float pathlengthWeight = std::max(1.0 - std::abs(current->distance() - m_config.targetDist) / m_config.windowDist, 0.0);
-                    
-                    if (!value.isZero()){
-                        for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[l] = value[l];
-                            temp[l + SPECTRUM_SAMPLES] = value[l] * pathlengthWeight;
-                        }
-                        result->put(current->getSamplePosition(), temp);
-                    }
+                    if (!value.isZero())
+                        result->put(current->getSamplePosition(), &value[0]);
 
                     /* The mutation was accepted */
                     std::swap(current, proposed);
@@ -284,12 +273,7 @@ public:
                     consecRejections++;
                     if (a > 0) {
                         Spectrum value = proposed->getRelativeWeight() * a;
-                        Float pathlengthWeight = std::max(1.0 - std::abs(proposed->distance() - m_config.targetDist) / m_config.windowDist, 0.0);
-                        for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                            temp[l] = value[l];
-                            temp[l + SPECTRUM_SAMPLES] = value[l] * pathlengthWeight;
-                        }
-                        result->put(proposed->getSamplePosition(), temp);
+                        result->put(proposed->getSamplePosition(), &value[0]);
                     }
                 }
             } else {
@@ -305,12 +289,7 @@ public:
 
         if (accumulatedWeight > 0) {
             Spectrum value = relWeight * accumulatedWeight;
-            Float pathlengthWeight = std::max(1.0 - std::abs(current->distance() - m_config.targetDist) / m_config.windowDist, 0.0);
-            for(size_t l=0; l<SPECTRUM_SAMPLES; l++){
-                temp[l] = value[l];
-                temp[l + SPECTRUM_SAMPLES] = value[l] * pathlengthWeight;
-            }
-            result->put(current->getSamplePosition(), temp);
+            result->put(current->getSamplePosition(), &value[0]);
         }
 
         #if defined(MTS_DEBUG_FP)
@@ -365,18 +344,7 @@ ref<WorkProcessor> MLTProcess::createWorkProcessor() const {
 void MLTProcess::develop() {
     LockGuard lock(m_resultMutex);
     size_t pixelCount = m_accum->getBitmap()->getPixelCount();
-    // Float *data = m_accum->getBitmap()->getData();
-
-    // Float *accum = (Float *) alloca(sizeof(Spectrum) * (pixelCount));
-    // Float *accum2 = (Float *) alloca(sizeof(Spectrum) * (pixelCount));
-    // for (size_t i=0; i<pixelCount; ++i){
-    //     for(int l=0; l<SPECTRUM_SAMPLES; l++){
-    //         accum[i * SPECTRUM_SAMPLES + l] =
-    //     }
-    // }
-
     const Spectrum *accum = (Spectrum *) m_accum->getBitmap()->getData();
-
     const Spectrum *direct = m_directImage != NULL ?
         (Spectrum *) m_directImage->getData() : NULL;
     const Float *importanceMap = m_config.importanceMap != NULL ?
@@ -387,10 +355,10 @@ void MLTProcess::develop() {
     Float avgLuminance = 0;
     if (importanceMap) {
         for (size_t i=0; i<pixelCount; ++i)
-            avgLuminance += accum[2 * i].getLuminance() * importanceMap[i];
+            avgLuminance += accum[i].getLuminance() * importanceMap[i];
     } else {
         for (size_t i=0; i<pixelCount; ++i)
-            avgLuminance += accum[2 * i].getLuminance();
+            avgLuminance += accum[i].getLuminance();
     }
 
     avgLuminance /= (Float) pixelCount;
@@ -399,10 +367,10 @@ void MLTProcess::develop() {
     for (size_t i=0; i<pixelCount; ++i) {
         Float correction = luminanceFactor;
         if (importanceMap)
-            correction *= importanceMap[2 * i];
-        Spectrum value = accum[2 * i + 1] * correction;
-        //if (direct)
-        //    value += direct[i];
+            correction *= importanceMap[i];
+        Spectrum value = accum[i] * correction;
+        if (direct)
+            value += direct[i];
         target[i] = value;
     }
 
@@ -449,7 +417,7 @@ void MLTProcess::bindResource(const std::string &name, int id) {
         if (m_progress)
             delete m_progress;
         m_progress = new ProgressReporter("Rendering", m_config.workUnits, m_job);
-        m_accum = new ImageBlock(Bitmap::EMultiChannel, m_film->getCropSize(), NULL, (int)(SPECTRUM_SAMPLES * 2));
+        m_accum = new ImageBlock(Bitmap::ESpectrum, m_film->getCropSize());
         m_accum->clear();
         m_developBuffer = new Bitmap(Bitmap::ESpectrum, Bitmap::EFloat, m_film->getCropSize());
     }

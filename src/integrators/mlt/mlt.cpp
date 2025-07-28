@@ -196,11 +196,6 @@ public:
 
         /* Stop MLT after X seconds -- useful for equal-time comparisons */
         m_config.timeout = props.getInteger("timeout", 0);
-
-        /* Transient related parms*/
-        m_config.isTransient = props.getBoolean("isTransient", false);
-        m_config.targetDist = props.getFloat("targetDist", 10);
-        m_config.windowDist = props.getFloat("windowDist", 10);
     }
 
     /// Unserialize from a binary data stream
@@ -292,8 +287,8 @@ public:
 
         ref<Bitmap> directImage;
         if (m_config.separateDirect && m_config.directSamples > 0 && !nested) {
-            directImage = BidirectionalUtils::renderDirectComponentTransient(scene,
-                sceneResID, sensorResID, queue, job, m_config.directSamples, m_config.targetDist, m_config.windowDist);
+            directImage = BidirectionalUtils::renderDirectComponent(scene,
+                sceneResID, sensorResID, queue, job, m_config.directSamples);
             if (directImage == NULL)
                 return false;
         }

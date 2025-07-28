@@ -53,10 +53,6 @@ struct MLTConfiguration {
     ref<Bitmap> importanceMap;
     size_t timeout;
 
-    bool isTransient;
-    Float targetDist;
-    Float windowDist;
-
     inline MLTConfiguration() { }
 
     void dump() const {
@@ -118,9 +114,6 @@ struct MLTConfiguration {
                 (size_t) size.x * (size_t) size.y);
         }
         timeout = stream->readSize();
-        isTransient = stream->readBool();
-        targetDist = stream->readFloat();
-        windowDist = stream->readFloat();
     }
 
     inline void serialize(Stream *stream) const {
