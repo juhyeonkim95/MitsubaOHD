@@ -68,3 +68,4 @@ mitsuba.*.log
 /build_double_rgb
 /src_original
 /fmcw_tutorial_old
+*.svg
