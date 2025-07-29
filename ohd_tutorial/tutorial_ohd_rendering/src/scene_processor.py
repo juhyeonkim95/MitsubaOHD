@@ -19,8 +19,8 @@ def add_fmcw_integrator(**kwargs):
     integrator.append(create_element("float", name="T", value=kwargs.get("T")))
     integrator.append(create_element("float", name="B", value=kwargs.get("B")))
 
-    if "f_c" in kwargs:
-        integrator.append(create_element("float", name="f_c", value=kwargs.get("f_c")))
+    if "f_0" in kwargs:
+        integrator.append(create_element("float", name="f_0", value=kwargs.get("f_0")))
     if "wavelength" in kwargs:
         integrator.append(create_element("float", name="wavelength", value=kwargs.get("wavelength")))
 
@@ -37,7 +37,7 @@ def add_fmcw_integrator(**kwargs):
     scene_scale = kwargs.get("scene_scale", 1)
 
     if "fov_error" in kwargs:
-        fov = kwargs.get("fov_error", 0.5) / scene_scale
+        fov = kwargs.get("fov_error", 0.5)
         integrator.append(create_element("float", name="fov_error", value=fov))
     
     return integrator, frames

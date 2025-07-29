@@ -99,7 +99,7 @@ def get_default_fmcw_setting():
     configs["radar"] = {
         'T': 7.33,
         'B': 0.15,
-        'f_c': 77
+        'f_0': 77
     }
 
     configs["lidar_static"] = {

@@ -2,6 +2,7 @@
 
 ## About
 We provide several tutorials for OHD rendering.
+(still working on adding more tutorials)
 
 ### Speckle Simulation for Simple Case (in `tutorial_speckle_simple`)
 This example provides a simple simulation on two peak scenario as shown in Fig.7 in the main paper.
@@ -23,4 +24,4 @@ First, run `src/render_full.py` to render FMCW PSD histogram.
 The output is [H, W, 2M] where 2M is for up and down chirp.
 Then, run `src/visualizer_full.py` to visualize PSD for up and down chirp.
 It runs interactively.
-![interactive_fmcw_psd](assets/interactive_fmcw_psd.png)
+![interactive_fmcw_psd](assets/interactive_fmcw_psd.gif)

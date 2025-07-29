@@ -9,12 +9,12 @@ class FMCWInterface {
 public:
     FMCWInterface() {};
     FMCWInterface(const Properties &props) {
-        // m_f_c = props.getFloat("f_c", 77); 
+        // m_f_0 = props.getFloat("f_0", 77); 
         if(props.hasProperty("wavelength")){
             Float wavelength = props.getFloat("wavelength", 1550); // nm (1e-9)
-            m_f_c = 3e8 / wavelength;
+            m_f_0 = 3e8 / wavelength;
         } else{
-            m_f_c = props.getFloat("f_c", 193414); // GHz (1e9)
+            m_f_0 = props.getFloat("f_0", 193414); // GHz (1e9)
         }
         m_B = props.getFloat("B", 1);  // GHz (1e9)
         m_T = props.getFloat("T", 10);  // micro second (1e-6)
@@ -28,7 +28,7 @@ public:
         
         bool invert = props.getBoolean("invert", false);
         if(invert){
-            m_f_c += m_B;
+            m_f_0 += m_B;
             m_B = -m_B;
         }
 
@@ -36,7 +36,7 @@ public:
         printf("[FMCWInterface INFO]\n");
         printf("\tT (us): %f\n", m_T);
         printf("\tB (GHz): %f\n", m_B);
-        printf("\tf_c (GHz): %f\n", m_f_c);
+        printf("\tf_c (GHz): %f\n", m_f_0);
         printf("\ffov_error : %f\n", m_fov_error);
         if(m_use_collimated_light){
                 printf("\tm_use_collimated_light: True\n");
@@ -52,12 +52,12 @@ public:
         Float r = 2 * M_PI * m_B * t_d * t / m_T * 1e3;
 
         // f_c * 1e9 * v * t * 1e-6 / 3e8
-        Float D = 2 * M_PI * m_f_c * path_velocity * t / 3e5;
+        Float D = 2 * M_PI * m_f_0 * path_velocity * t / 3e5;
 
 
         // 2 * pi * f_c * t_d
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
-        Float p = 2 * M_PI * m_f_c * t_d * 1e3;
+        Float p = 2 * M_PI * m_f_0 * t_d * 1e3;
         Float final_phase = r + D + p + 2 * M_PI *random_phase;
         
         Float sin_phi = std::sin(final_phase);
@@ -68,7 +68,7 @@ public:
     }
 
     std::pair<Float, Float> get_fmcw_weight_velocity_inverted(Float t, Float path_length, Float path_velocity, Float random_phase) const {
-        Float n_f_c = m_f_c + m_B;
+        Float n_f_0 = m_f_0 + m_B;
         Float n_B = -m_B;
 
         // R / c
@@ -79,11 +79,11 @@ public:
         Float r = 2 * M_PI * n_B * t_d * t / m_T * 1e3;
 
         // f_c * 1e9 * v * t * 1e-6 / 3e8
-        Float D = 2 * M_PI * n_f_c * path_velocity * t / 3e5;
+        Float D = 2 * M_PI * n_f_0 * path_velocity * t / 3e5;
 
         // 2 * pi * f_c * t_d
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
-        Float p = 2 * M_PI * n_f_c * t_d * 1e3;
+        Float p = 2 * M_PI * n_f_0 * t_d * 1e3;
 
         // return (std::cos(r + D + p + 2 * M_PI *random_phase));
         Float final_phase = r + D + p + 2 * M_PI * random_phase;
@@ -106,7 +106,7 @@ public:
         Float f_r = m_B * t_d / m_T * 1e3;
 
         // f_c * 1e9 * v * t * 1e-6 / 3e8 * 1e-6
-        Float f_D = m_f_c * path_velocity / 3e5;
+        Float f_D = m_f_0 * path_velocity / 3e5;
 
         return f_r + f_D;
     }
@@ -115,7 +115,7 @@ public:
         // R / c
         // R / 3e8 * 1e6
         Float B = m_B * 1e9;
-        Float f_c = m_f_c * 1e9;
+        Float f_c = m_f_0 * 1e9;
         Float T = m_T * 1e-6;
         Float c = 3e8;
 
@@ -132,7 +132,7 @@ public:
         // R / c
         // R / 3e8 * 1e6
         Float B = -m_B * 1e9;
-        Float f_c = m_f_c * 1e9;
+        Float f_c = m_f_0 * 1e9;
         Float T = m_T * 1e-6;
         Float c = 3e8;
 
@@ -146,7 +146,7 @@ public:
     }
 
     Float get_fmcw_weight_velocity_inverted_freq(Float path_length, Float path_velocity) const {
-        //Float n_f_c = m_f_c + m_B;
+        //Float n_f_0 = m_f_0 + m_B;
         //Float n_B = -m_B;
 
         // R / c
@@ -157,7 +157,7 @@ public:
         Float f_r = m_B * t_d / m_T * 1e3;
 
         // f_c * 1e9 * v * t * 1e-6 / 3e8 * 1e-6
-        Float f_D = m_f_c * path_velocity / 3e5;
+        Float f_D = m_f_0 * path_velocity / 3e5;
 
         return (f_r - f_D);
     }
@@ -169,7 +169,7 @@ public:
 
         // 2 * pi * f_c * t_d
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
-        Float A = 2 * M_PI * m_f_c * t_d * 1e3;
+        Float A = 2 * M_PI * m_f_0 * t_d * 1e3;
 
         // pi * B * t_d * t_d / T
         // pi * B * 1e9 * t_d * 1e-6 * t_d * 1e-6 / (T * 1e-6)
@@ -183,7 +183,7 @@ public:
     }
 
     Float get_fmcw_weight_invert(Float t, Float path_length) const {
-        Float n_f_c = m_f_c + m_B;
+        Float n_f_0 = m_f_0 + m_B;
         Float n_B = -m_B;
 
         // R / c
@@ -192,7 +192,7 @@ public:
 
         // 2 * pi * f_c * t_d
         // 2 * pi * f_c * 1e9 * t_d * 1e-6
-        Float A = 2 * M_PI * n_f_c * t_d * 1e3;
+        Float A = 2 * M_PI * n_f_0 * t_d * 1e3;
 
         // pi * B * t_d * t_d / T
         // pi * B * 1e9 * t_d * 1e-6 * t_d * 1e-6 / (T * 1e-6)
@@ -211,7 +211,7 @@ protected:
     Float m_time;
     Float m_B;
     Float m_T;
-    Float m_f_c;
+    Float m_f_0;
     Float m_R_min;
     Float m_fov_error;
     Float m_laser_mrad;

@@ -17,7 +17,7 @@ This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rend
 ## Install
 To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
 
-Instead of config, please use double precision and mono-channel config (`config_double_single.py`).
+Instead of original config, please use double precision and mono-channel config (`config_double_single.py`).
 
 ## Parameter Explanation
 New integrators are added in `src/integrators/fmcw` folder, for OHD rendering.
@@ -25,13 +25,13 @@ Two types of laser are typically used for OHD rendering, standard laser with con
 FMCW (frequency-modulated continuous-wave) use swept-frequency laser with up and down chirp.
 Since FMCW is the most general case of OHD, we named integrator as `fmcw`.
 
-### Integrator Type
+### Integrator Types
 * `fmcw_psd`: frequency-domain PSD (Power Spectral Density) rendering, corresponding to Algorithm1 in the paper. It outputs [H x W x 2M] where M is histogram bin number. 2M is for (up, down) chirp each.
-* `fmcw_field`: time-domain rendering with field sampling and random phase addition, corresponding to Algorithm2 in the paper. It outputs [H x W x 4M] where M is FFT sample number. 4M is for (up, down) chirp and real, complex term. 
+* `fmcw_field`: time-domain rendering with field sampling and random phase addition, corresponding to Algorithm2 in the paper. It outputs [H x W x 4M] where M is FFT sample number. 4M is for (up, down) chirp x (real, complex) term each. 
 
 ### Detailed Parameters
 * `wavelength` : Laser wavelength in nanometer (default : 1550)
-* `f_c` : Laser frequency in GHz. If `wavelength` is also defined, we use `wavelength` first (default : 193,414)
+* `f_0` : Laser frequency in GHz. If `wavelength` is also defined, we use `wavelength` first (default : 193,414)
 * `T` : Sweep time for one chirp in microsecond (default : 10)
 * `B` : Signal bandwidth in GHz (default : 1)
 * `M` : Number of time stamps used for FFT or histogram bin (default : 4096)
@@ -40,10 +40,10 @@ Since FMCW is the most general case of OHD, we named integrator as `fmcw`.
 * `use_random_phase` : Whether to use random phase addition for `fmcw_field`. (default : true)
 
 ## Usage
-```
-(TBA)
-```
-We included exhaustive examples in `ohd_tutorial` folder at [here](ohd_tutorial/README.md). You can simulate various experiments in the main paper.
+We included exhaustive examples in `ohd_tutorial` folder at [here](ohd_tutorial/README.md). 
+You can simulate various experiments in the main paper including below interactive PSD visualization.
+![interactive_fmcw_psd](ohd_tutorial/assets/interactive_fmcw_psd.gif)
+
 
 ## Citation
 If you find this useful for your research, please consider to cite:
