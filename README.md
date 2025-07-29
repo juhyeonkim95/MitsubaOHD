@@ -1,6 +1,6 @@
 # Mitsuba0.6 OHD Renderer
 
-### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial](fmcw_tutorial/README.md)
+### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial](ohd_tutorial/README.md)
 
 ![visualization](assets/teaser.png)
 
@@ -26,8 +26,8 @@ FMCW (frequency-modulated continuous-wave) use swept-frequency laser with up and
 Since FMCW is the most general case of OHD, we named integrator as `fmcw`.
 
 ### Integrator Type
-* `fmcw_instant_frequency`: frequency-domain PSD (Power Spectral Density) rendering, corresponding to Algorithm1 in the paper. It outputs [H x W x M] where M is histogram bin number.
-* `fmcw_instant`: time-domain rendering with field sampling and random phase addition, corresponding to Algorithm2 in the paper. It outputs [H x W x M] where M is FFT sample number.
+* `fmcw_psd`: frequency-domain PSD (Power Spectral Density) rendering, corresponding to Algorithm1 in the paper. It outputs [H x W x 2M] where M is histogram bin number. 2M is for (up, down) chirp each.
+* `fmcw_field`: time-domain rendering with field sampling and random phase addition, corresponding to Algorithm2 in the paper. It outputs [H x W x 4M] where M is FFT sample number. 4M is for (up, down) chirp and real, complex term. 
 
 ### Detailed Parameters
 * `wavelength` : Laser wavelength in nanometer (default : 1550)
@@ -37,25 +37,32 @@ Since FMCW is the most general case of OHD, we named integrator as `fmcw`.
 * `M` : Number of time stamps used for FFT or histogram bin (default : 4096)
 * `use_collimated` : Ignore light setting and use collimated laser (default : false)
 * `fov_error` : Additional parameter to change laser FOV. If set to $a$, instead of uniform sample from whole pixel, we sample centered square-area with $2a$ (default : 0.5).
-* `use_random_phase` : Whether to use random phase addition for `fmcw_instant`. (default : true)
+* `use_random_phase` : Whether to use random phase addition for `fmcw_field`. (default : true)
 
 ## Usage
 ```
 (TBA)
 ```
-We also included exhaustive examples in `fmcw_tutorial` folder at [here](fmcw_tutorial/README.md). You can simulate various experiments in the main paper.
+We included exhaustive examples in `ohd_tutorial` folder at [here](ohd_tutorial/README.md). You can simulate various experiments in the main paper.
 
 ## Citation
 If you find this useful for your research, please consider to cite:
 ```
 @article{kim2025ohd,
-    title={A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection},
-    author={Kim, Juhyeon and Benko, Craig and Wrenninge, Magnus and Villemin, Ryusuke and Barber, Zeb and Jarosz, Wojciech and Pediredla, Adithya},
-    journal={ACM Transactions on Graphics (TOG)},
-    volume={44},
-    number={4},
-    pages={1--18},
-    year={2025},
-    publisher={ACM New York, NY, USA}
+  author = {Kim, Juhyeon and Benko, Craig and Wrenninge, Magnus and Villemin, Ryusuke and Barber, Zeb and Jarosz, Wojciech and Pediredla, Adithya},
+  title = {A Monte Carlo Rendering Framework for Simulating Optical Heterodyne Detection},
+  year = {2025},
+  issue_date = {August 2025},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {44},
+  number = {4},
+  issn = {0730-0301},
+  url = {https://doi.org/10.1145/3731150},
+  doi = {10.1145/3731150},
+  journal = {ACM Trans. Graph.},
+  month = jul,
+  articleno = {56},
+  numpages = {19}
 }
 ```

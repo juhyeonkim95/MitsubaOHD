@@ -24,8 +24,6 @@ public:
         m_use_collimated_light = props.getBoolean("use_collimated", false);
         m_fov_error = props.getFloat("fov_error", 0.5);
         m_laser_mrad = props.getFloat("m_laser_mrad", -1.0);
-        m_use_amplitude = props.getBoolean("use_amplitude", false);
-        m_sqrt_pdf = props.getBoolean("pdf_sqrt", false);
         m_use_random_phase = props.getBoolean("use_random_phase", true);
         
         bool invert = props.getBoolean("invert", false);
@@ -43,12 +41,6 @@ public:
         if(m_use_collimated_light){
                 printf("\tm_use_collimated_light: True\n");
         } else { printf("\tm_use_collimated_light: False\n");}
-        // if(m_use_amplitude){
-        //         printf("\tm_use_amplitude: True\n");
-        // } else { printf("\tm_use_amplitude: False\n");}
-        // if(m_sqrt_pdf){
-        //         printf("\tm_sqrt_pdf: True\n");
-        // } else { printf("\tm_sqrt_pdf: False\n");}
     };
 
     std::pair<Float, Float> get_fmcw_weight_velocity(Float t, Float path_length, Float path_velocity, Float random_phase) const {
@@ -225,7 +217,5 @@ protected:
     Float m_laser_mrad;
     size_t m_M;
     bool m_use_collimated_light;
-    bool m_use_amplitude;
-    bool m_sqrt_pdf;
     bool m_use_random_phase;
 };

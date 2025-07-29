@@ -69,3 +69,4 @@ mitsuba.*.log
 /src_original
 /fmcw_tutorial_old
 *.svg
+/ohd_tutorial/trash

@@ -115,9 +115,7 @@ public:
             m_max_distance = props.getFloat("max_distance", 10);
             m_min_distance = props.getFloat("min_distance", 0);
             m_use_collimated_light = props.getBoolean("use_collimated", false);
-            m_use_amplitude = props.getBoolean("use_amplitude", false);
             m_fov_error = props.getFloat("fov_error", 0.5);
-            m_sqrt_pdf = props.getBoolean("pdf_sqrt", false);
 
 
             printf("[Transient INFO]\n");
@@ -127,12 +125,6 @@ public:
             if(m_use_collimated_light){
                  printf("\tm_use_collimated_light: True\n");
             } else { printf("\tm_use_collimated_light: False\n");}
-            if(m_use_amplitude){
-                 printf("\tm_use_amplitude: True\n");
-            } else { printf("\tm_use_amplitude: False\n");}
-            if(m_sqrt_pdf){
-                printf("\tm_sqrt_pdf: True\n");
-            } else { printf("\tm_sqrt_pdf: False\n");}
             
             printf("\ffov_error : %f\n", m_fov_error);
         }
@@ -536,8 +528,6 @@ private:
     Float m_min_distance;
     size_t m_bin;
     bool m_use_collimated_light;
-    bool m_use_amplitude;
-    bool m_sqrt_pdf;
     Float m_fov_error;
 };
 
