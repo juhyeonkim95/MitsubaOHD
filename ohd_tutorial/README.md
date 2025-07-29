@@ -19,8 +19,8 @@ This example provides a microsurface simulation on Doppler effect (target vs spo
 ![microsuface_doppler](assets/image2.png)
 
 ### Rendering Simulation (in `tutorial_ohd_rendering`)
-First, run `src/render_full.py` to render FMCW histogram. 
+First, run `src/render_full.py` to render FMCW PSD histogram. 
 The output is [H, W, 2M] where 2M is for up and down chirp.
 Then, run `src/visualizer_full.py` to visualize PSD for up and down chirp.
 It runs interactively.
-![](video.mp4)
+![interactive_fmcw_psd](assets/interactive_fmcw_psd.png)
