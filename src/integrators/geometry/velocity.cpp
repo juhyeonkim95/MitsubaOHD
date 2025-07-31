@@ -23,6 +23,8 @@ MTS_NAMESPACE_BEGIN
 
 static StatsCounter avgPathLength("Radial Velocity Approximator", "Average path length", EAverage);
 
+// This is for macroscopic distance change rate!
+
 class RadialVelocityApproximator : public MonteCarloIntegrator {
 public:
     RadialVelocityApproximator(const Properties &props)

@@ -63,7 +63,7 @@ def get_crop_dist_range(scene_name):
 
 def get_transient_min_max_range(scene_name):
     if "cornell-box" in scene_name:
-        return (0, 100)
+        return (0, 40)
     elif "living-room-2" in scene_name:
         return (0, 20)
     elif "road" in scene_name:

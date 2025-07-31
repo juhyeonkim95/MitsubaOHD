@@ -1,8 +1,7 @@
 from scene_processor import *
 import subprocess
 
-def run_fmcwpsd_for_full_image():
-    scene_name = "cornell-box-floor-specular"
+def run_fmcwpsd_for_full_image(scene_name, scene_scale=10, max_depth=4):
     output_folder = os.path.join("../", "results")
     
     # set PSD min and max range (use distance unit instead of frequency for convenience)
@@ -10,14 +9,14 @@ def run_fmcwpsd_for_full_image():
 
     configs = {
         "scene_name": scene_name,
-        "maxDepth": 4,
+        "maxDepth": max_depth,
         "image_scale": 8,
         "add_velocity": True,
         "M": 1024,
         "B": 1,
         "T": 5,
         "wavelength": 1550,
-        "scene_scale": 10,
+        "scene_scale": scene_scale,
         "spp": 4096,
         "use_single_pixel": False,
         "integrator_type": "fmcwpsd",
@@ -38,4 +37,4 @@ def run_fmcwpsd_for_full_image():
 
 
 if __name__ == "__main__":
-    run_fmcwpsd_for_full_image()
+    run_fmcwpsd_for_full_images(scene_name="cornell-box-floor-specular", scene_scale=10, max_depth=4)

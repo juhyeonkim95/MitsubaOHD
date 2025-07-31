@@ -23,6 +23,7 @@ This example provides a microsurface simulation on Doppler effect (target vs spo
 
 ## Rendering tutorial (this needs Mitsuba, in `tutorial_ohd_rendering`)
 ### Interactive histogram (using Alg1)
+This example provides an interactive PSD visualization for rendering.
 Run `src/render_full.py` to render FMCW PSD histogram (Alg1). 
 The output is [H, W, 2M] where 2M is for up and down chirp.
 Then, run `src/visualizer_full.py` to visualize PSD for up and down chirp.
@@ -30,8 +31,17 @@ It runs interactively.
 ![interactive_fmcw_psd](assets/interactive_fmcw_psd.gif)
 
 ### Single point comparison 
+This example provides an comparison between Alg1, Alg2 for a single point in the rendered image.
 Run `src/render_single.py` to get FMCW PSD histogram (Alg1) and multiple field evaluations (Alg2). 
 For PSD evaluation, output is [1, 1, 2M] where 2M is for up and down chirp.
-For field evaluation, output is [1, 1, 4M] where 2M is for up and down chirp with complex value.
+For field evaluation, output is [1, 1, 4M'] where 2M is for up and down chirp with complex value. (M for PSD and field does not need to be same)
 Then, run `src/visualizer_single.py` to visualize convergence of each algorithm for up and down chirp which corresponds to Fig.11 in the main paper. 
+Images will be exported to the `plots` folder.
 ![rendering_algorithm_convergence](assets/rendering_algorithm_convergence.png)
+
+### Distance Velocity Reconstruction
+This example provides an example for distance and velocity reconstruction from FMCW PSD measurement.
+Run `src/distance_velocity_reconstruction.py`, and you will get distance and velocity reconstruction result as Fig.12 in the main paper.
+You can find several points that distance and velocity reconstruction fail.
+Images will be exported to the `plots` folder.
+![distance_velocity_recon](assets/distance_velocity_recon.png)

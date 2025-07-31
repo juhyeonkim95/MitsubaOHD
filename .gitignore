@@ -70,3 +70,4 @@ mitsuba.*.log
 /fmcw_tutorial_old
 *.svg
 /ohd_tutorial/trash
+*.log
