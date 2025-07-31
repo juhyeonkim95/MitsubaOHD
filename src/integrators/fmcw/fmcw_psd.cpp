@@ -536,13 +536,9 @@ public:
                     Float f_up = get_fmcw_weight_velocity_freq(path_length, path_velocity);
                     Float f_down = get_fmcw_weight_velocity_inverted_freq(path_length, path_velocity);
                     
+                    // up & down chirp
                     auto[idx1, remainder1] = freq_to_index(f_up);
                     auto[idx2, remainder2] = freq_to_index(f_down);
-                    // Float p1 = get_fmcw_weight_velocity_phase(path_length, path_velocity);
-                    // Float p2 = get_fmcw_weight_velocity_phase_invert(path_length, path_velocity);
-
-                    // Float cos1 = np.cos(M_PI * 2 * p1);
-                    // Float cos2 = np.cos(M_PI * 2 * p2);
 
                     size_t idx11 = std::clamp(idx1 + 1, (size_t)0, m_M-1);
                     size_t idx22 = std::clamp(idx2 + 1, (size_t)0, m_M-1);

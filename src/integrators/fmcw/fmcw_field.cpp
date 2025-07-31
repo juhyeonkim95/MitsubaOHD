@@ -481,9 +481,6 @@ public:
                 jitter = jitter * m_fov_error + Vector2(0.5);
                 Point2 samplePos = Point2(offset) + jitter;
 
-                // Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
-                // Point2 samplePos(Point2(offset) + Vector2(0.5f));
-
                 if (needsApertureSample)
                     apertureSample = rRec.nextSample2D();
                 if (needsTimeSample)
@@ -524,7 +521,8 @@ public:
                     // (3) put to each time samples
                     for(size_t ti=0; ti<m_M; ti++){
                         Float t = (ti + 0.5) / m_M * m_T;
-
+                        
+                        // up & down chirp
                         auto [cos1, sin1] = get_fmcw_weight_velocity(t, path_length, path_velocity, r1);
                         auto [cos2, sin2] = get_fmcw_weight_velocity_inverted(t, path_length, path_velocity, r2);
 

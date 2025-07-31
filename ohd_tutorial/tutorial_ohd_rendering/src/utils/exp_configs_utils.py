@@ -26,28 +26,28 @@ def get_velocity_dictionary():
     }
     return velocity_dictionary
 
-def get_crop_pos(scene_name, crop_index=0):
-
+def get_single_pixel_pos(scene_name, index=0):
+    # pixel position in original scale image.
     if "cornell-box" in scene_name:
-        if "pos2" in scene_name:
-            return (52, 122)
-        elif "pos3" in scene_name:
-            return (52, 64)
-        return (32, 122)
+        # if "pos2" in scene_name:
+        #     return (52, 122)
+        # elif "pos3" in scene_name:
+        #     return (52, 64)
+        return (32 * 8, 122 * 8)
         # return (31, 122)
     elif "living-room-2" in scene_name:
         # return (20, 33)
-        return (12, 40)
+        return (12 * 8, 40 * 8)
     elif "road" in scene_name:
         return (110, 48)
     elif "rectangle" in scene_name:
         return (63, 65)
     elif "doggler" in scene_name:
-        if crop_index == 0:
+        if index == 0:
             return (245, 419)
-        elif crop_index == 1:
+        elif index == 1:
             return (340, 419)
-        elif crop_index == 2:
+        elif index == 2:
             return (378, 419)
 
 
@@ -63,7 +63,7 @@ def get_crop_dist_range(scene_name):
 
 def get_transient_min_max_range(scene_name):
     if "cornell-box" in scene_name:
-        return (0, 40)
+        return (0, 100)
     elif "living-room-2" in scene_name:
         return (0, 20)
     elif "road" in scene_name:

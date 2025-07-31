@@ -1,8 +1,5 @@
 from scene_processor import *
-import itertools
 import subprocess
-import matplotlib.pyplot as plt
-import configargparse
 
 def run_fmcwpsd_for_full_image():
     scene_name = "cornell-box-floor-specular"
@@ -22,7 +19,7 @@ def run_fmcwpsd_for_full_image():
         "wavelength": 1550,
         "scene_scale": 10,
         "spp": 4096,
-        "use_crop": False,
+        "use_single_pixel": False,
         "integrator_type": "fmcwpsd",
         "light_option": "collimated", # point or collimated or area
         "min_distance": min_distance,

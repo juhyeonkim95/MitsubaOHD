@@ -179,8 +179,10 @@ def process_scene_file_and_export(**kwargs):
     if film_node.find('*[@name="banner"]') is not None:
         film_node.remove(film_node.find('*[@name="banner"]'))
 
-    if kwargs.get("use_crop", False):
-        crop_x, crop_y = get_crop_pos(scene_name, kwargs.get("crop_index", 0))
+    if kwargs.get("use_single_pixel", False):
+        crop_x, crop_y = get_single_pixel_pos(scene_name, kwargs.get("crop_index", 0))
+        crop_x = crop_x // image_scale
+        crop_y = crop_y // image_scale
         film_node.append(create_element("integer", name="cropOffsetX", value=crop_x))
         film_node.append(create_element("integer", name="cropOffsetY", value=crop_y))
         film_node.append(create_element("integer", name="cropWidth", value=1))
