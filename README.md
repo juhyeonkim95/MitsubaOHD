@@ -39,6 +39,18 @@ Since FMCW is the most general case of OHD, we named integrator as `fmcw`.
 * `fov_error` : Additional parameter to change laser FOV. If set to $a$, instead of uniform sample from whole pixel, we sample centered square-area with $2a$ (default : 0.5).
 * `use_random_phase` : Whether to use random phase addition for `fmcw_field`. (default : true)
 
+Also, now object velocity property (translational only) could be added as:
+```
+<shape type="rectangle">
+  <transform name="toWorld">
+    <matrix value="-4.37114e-008 1 4.37114e-008 0 0 -8.74228e-008 2 0 1 4.37114e-008 1.91069e-015 0 0 0 0 1" />
+    <scale value="10" />
+  </transform>
+  <ref id="Floor" />
+  <vector name="velocity" x="0.0" y="2.0" z="0.0" />
+</shape>
+```
+
 ## Usage
 We included exhaustive examples in `ohd_tutorial` folder at [here](ohd_tutorial/README.md). 
 You can simulate various experiments in the main paper including below interactive PSD visualization.

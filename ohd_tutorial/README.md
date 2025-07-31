@@ -45,3 +45,6 @@ Run `src/distance_velocity_reconstruction.py`, and you will get distance and vel
 You can find several points that distance and velocity reconstruction fail.
 Images will be exported to the `plots` folder.
 ![distance_velocity_recon](assets/distance_velocity_recon.png)
+
+More scenes used in Fig.12 could be downloaded at [here](https://drive.google.com/drive/folders/1ON2GGTnJV8_xDW9jo5-Oa631HHGLngoF?usp=sharing). 
+Other Mitsuba scenes are available at [here](https://benedikt-bitterli.me/resources/)
