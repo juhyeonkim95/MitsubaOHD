@@ -37,4 +37,4 @@ def run_fmcwpsd_for_full_image(scene_name, scene_scale=10, max_depth=4):
 
 
 if __name__ == "__main__":
-    run_fmcwpsd_for_full_images(scene_name="cornell-box-floor-specular", scene_scale=10, max_depth=4)
+    run_fmcwpsd_for_full_image(scene_name="cornell-box-floor-specular", scene_scale=10, max_depth=4)
