@@ -15,8 +15,8 @@ This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rend
 (SIGGRAPH 2025, journal paper, 🏆 Honorable mention).
 
 ## Install
-To compile, follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba).
-
+You can compile it just same as standard Mitsuba0.6.
+If you are not familiar with Mitsuba0.6 renderer, please follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba) or Chapter4 of [Mitsuba0.5 document](https://www.mitsuba-renderer.org/releases/current/documentation.pdf)
 Instead of original config, please use double precision and mono-channel config (`config_double_single.py`).
 
 ## Parameter Explanation
