@@ -1,6 +1,6 @@
 # Mitsuba0.6 OHD Renderer
 
-### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial](ohd_tutorial/README.md)
+### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial (Replicate Paper Results)](ohd_tutorial/README.md)
 
 ![visualization](assets/teaser.png)
 
