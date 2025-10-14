@@ -1,8 +1,7 @@
 # Mitsuba OHD Rendering Tutorial
 
 ## About
-We provide several tutorials for OHD rendering.
-(still working on adding more tutorials)
+We provide several tutorials for OHD rendering. You can directly run each python file to check the result.
 
 ## Non-rendering tutorial (this does not need Mitsuba)
 ### Speckle Simulation for Simple Case (in `tutorial_speckle_simple`)
