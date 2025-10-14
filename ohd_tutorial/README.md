@@ -14,6 +14,7 @@ This example provides a simple simulation on two peak scenario as shown in Fig.7
 * Evaluate normalized covariance matrix
 * Evaluate power spectrum (to show Alg1 and Alg2 converge to the same result)
 * Evaluate intensity histogram at specific frequency
+
 You can find the results in `covariance_matrix`, `power_spectrum`, `intensity_histogram` folders respectively.
 ![speckle_simple](assets/speckle_simple.png)
 
@@ -23,6 +24,7 @@ This example provides a microsurface simulation on Doppler effect (target vs spo
 `main.py` does
 * Evaluate PSD by generating microsurface (from Gaussian process) and actually moving it over each time stamp with field evaluation.
 * Change condition of RMS height and correlation length (two parameters used for Gaussian surface generation) and compare result.
+
 You can find the results in the `result` folder.
 ![microsuface_doppler](assets/microsuface_doppler.png)
 
