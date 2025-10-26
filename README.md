@@ -20,6 +20,10 @@ If you are not familiar with Mitsuba0.6 renderer, please follow the original Mit
 <!-- Instead of original config, please use double precision and mono-channel config (`config_double_single.py`). -->
 Or, you can follow below code for compile and run [tutorials](ohd_tutorial/README.md).
 ```
+###############################
+# For Mitsuba Compile
+###############################
+
 # Create python2 env for Mitsuba0.5 compile
 conda env create -n mitsuba0.5python2 -f environment_mitsuba_compile.yml
 conda activate mitsuba0.5python2
@@ -48,10 +52,11 @@ scons -j 16
 
 # set Mitsuba0.5 path
 source ./setpath.sh
-```
 
-For tutorial running, you need to use other enviroment.
-```
+###############################
+# For tutorial running
+###############################
+
 conda env create -n mitsubaohd -f environment_tutorial.yml
 conda activate mitsubaohd
 
@@ -60,11 +65,20 @@ cd ohd_tutorials
 ```
 
 ### Install with Docker
-Or, you can install with `Dockerfile`.
+Or, you can install with `Dockerfile`
 ```
 # build and run docker
 docker build -t mitsubaohd .
 sudo docker run --rm -it -v "$PWD":/work mitsubaohd
+
+# compile
+conda activate mitsuba0.5python2
+scons -j 16
+source ./setpath.sh
+
+# run tutorial
+conda activate mitsubaohd
+cd ohd_tutorials
 ```
 
 
