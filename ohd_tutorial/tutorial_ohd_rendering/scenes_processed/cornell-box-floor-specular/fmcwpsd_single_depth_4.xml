@@ -127,7 +127,7 @@
 		<float name="T" value="5" />
 		<float name="B" value="1" />
 		<float name="wavelength" value="1550" />
-		<float name="max_distance" value="1000" />
+		<float name="max_distance" value="400" />
 		<float name="min_distance" value="0" />
 		<boolean name="use_collimated" value="true" />
 	</integrator>

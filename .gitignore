@@ -15,7 +15,7 @@ build/release
 build/debug
 debian
 .sconsign.dblite
-config.py
+# config.py
 config.log
 *.pyc
 
@@ -26,7 +26,6 @@ build/mitsuba-msvc2017.vcxproj.user
 build/.vs/**/*
 data/windows/mitsuba_res.res
 dist
-build/*
 build_double/*
 
 # Debugging history files
@@ -62,8 +61,7 @@ mitsuba.*.log
 *.npy
 /doppler_things
 /fmcw_tutorial/results
-/build
-/build_double/
+/build_double
 /build_float_rgb
 /build_double_rgb
 /src_original

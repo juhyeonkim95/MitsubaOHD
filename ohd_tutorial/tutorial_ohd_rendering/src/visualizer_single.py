@@ -57,11 +57,10 @@ down_powers = np.array(down_powers)
 # Average over all iterations
 avg_up = up_powers.mean(axis=0)
 avg_down = down_powers.mean(axis=0)
-C_up = np.sum(avg_up) / M
-C_down = np.sum(avg_up) / M
+C_up = np.sum(avg_up) / (M / 2) # only positive half contributes
+C_down = np.sum(avg_down) / (M / 2) # only positive half contributes
 avg_up /= C_up
 avg_down /= C_down
-
 
 def to_log_scale(x, eps=1e-12):
     return 10 * np.log10(x + eps)

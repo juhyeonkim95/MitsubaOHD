@@ -1,0 +1,29 @@
+name: mitsuba0.5python2
+channels:
+  - defaults
+dependencies:
+  - python=2.7.18
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=5.1
+  - ca-certificates=2022.07.19
+  - certifi=2020.6.20
+  - libffi=3.3
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libstdcxx-ng=11.2.0
+  - ncurses=6.3
+  - pip=19.3.1
+  - python=2.7.18
+  - readline=8.2
+  - setuptools=44.0.0
+  - sqlite=3.39.3
+  - tk=8.6.12
+  - wheel=0.37.1
+  - zlib=1.2.13
+  - pip:
+      - blessings==1.7
+      - gpustat==0.6.0
+      - nvidia-ml-py==11.515.75
+      - psutil==5.9.4
+      - scons==2.5.1
+      - six==1.16.0

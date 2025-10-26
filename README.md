@@ -1,6 +1,6 @@
 # Mitsuba0.6 OHD Renderer
 
-### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial (Replicate Paper Results)](ohd_tutorial/README.md)
+### [Project Page](https://juhyeonkim95.github.io/project-pages/ohd_rendering/) | [Paper](https://dl.acm.org/doi/10.1145/3731150) | [Tutorial](ohd_tutorial/README.md)
 
 ![visualization](assets/teaser.png)
 
@@ -17,7 +17,56 @@ This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rend
 ## Install
 You can compile it just same as standard Mitsuba0.6.
 If you are not familiar with Mitsuba0.6 renderer, please follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba) or Chapter4 of [Mitsuba0.5 document](https://www.mitsuba-renderer.org/releases/current/documentation.pdf).
-Instead of original config, please use double precision and mono-channel config (`config_double_single.py`).
+<!-- Instead of original config, please use double precision and mono-channel config (`config_double_single.py`). -->
+Or, you can follow below code for compile and run [tutorials](ohd_tutorial/README.md).
+```
+# Create python2 env for Mitsuba0.5 compile
+conda env create -n mitsuba0.5python2 -f environment_mitsuba_compile.yml
+conda activate mitsuba0.5python2
+
+# install required packages (check original document for details)
+sudo apt-get install -y --no-install-recommends \
+    build-essential \
+    scons \
+    mercurial \
+    libilmbase-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libxerces-c-dev \
+    libboost-all-dev \
+    libopenexr-dev \
+    libglewmx-dev \
+    libxxf86vm-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    libeigen3-dev \
+    libfftw3-dev \
+  
+# compile Mitsuba 0.5
+scons -j 16
+
+# set Mitsuba0.5 path
+source ./setpath.sh
+```
+
+For tutorial running, you need to use other enviroment.
+```
+conda env create -n mitsubaohd -f environment_tutorial.yml
+conda activate mitsubaohd
+
+cd ohd_tutorials
+# then run tutorial codes in several folders.
+```
+
+### Install with Docker
+Or, you can install with `Dockerfile`.
+```
+# build and run docker
+docker build -t mitsubaohd .
+sudo docker run --rm -it -v "$PWD":/work mitsubaohd
+```
+
 
 ## Parameter Explanation
 New integrators are added in `src/integrators/fmcw` folder, for OHD rendering.

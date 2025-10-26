@@ -5,7 +5,6 @@ import numpy as np
 from scipy.fft import fft, ifft, fftfreq, fftshift
 import matplotlib
 matplotlib.use('Svg')
-import tamaas as tm
 
 
 def save_heightmap(heightmap, filename, wave_length, actual_patch_size):
@@ -36,11 +35,3 @@ def save_heightmap(heightmap, filename, wave_length, actual_patch_size):
     plt.title('Heightmap')
     plt.savefig("%s.png"% filename)
     plt.close('all')
-
-    # acf = tm.Statistics2D.computeAutocorrelation(heightmap)
-    # acf = np.fft.fftshift(acf)
-
-    # plt.figure()
-    # plt.imshow(acf)
-    # plt.savefig("%s_acf.png"% filename)
-    # plt.close('all')

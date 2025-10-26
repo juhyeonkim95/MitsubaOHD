@@ -57,5 +57,5 @@ if __name__ == "__main__":
     scene_name = "cornell-box-floor-specular"
     run_for_single_pixel(scene_name, "fmcwpsd", maxdepth=4, repeat=1, use_single_pixel=use_single_pixel)
     run_for_single_pixel(scene_name, "fmcwfield", maxdepth=4, repeat=1000, use_single_pixel=use_single_pixel)
-    run_for_single_pixel(scene_name, "fmcwfield", maxdepth=2, repeat=1000, use_single_pixel=use_single_pixel)
+    # run_for_single_pixel(scene_name, "fmcwfield", maxdepth=2, repeat=1000, use_single_pixel=use_single_pixel)
     
