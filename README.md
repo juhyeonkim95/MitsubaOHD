@@ -18,8 +18,10 @@ This repository is the official Mitsuba0.6 implementation of "A Monte Carlo Rend
 You can compile it just same as standard Mitsuba0.6.
 If you are not familiar with Mitsuba0.6 renderer, please follow the original Mitsuba compliation guide at [here](https://github.com/mitsuba-renderer/mitsuba) or Chapter4 of [Mitsuba0.5 document](https://www.mitsuba-renderer.org/releases/current/documentation.pdf).
 <!-- Instead of original config, please use double precision and mono-channel config (`config_double_single.py`). -->
-Or, you can follow below code for compile and run [tutorials](ohd_tutorial/README.md).
+Or, you can follow below code for compile and run [tutorials](ohd_tutorial/README.md). (tested for Ubuntu 22.04)
 ```
+git clone --recursive https://github.com/juhyeonkim95/MitsubaOHD
+
 ###############################
 # For Mitsuba Compile
 ###############################
@@ -45,7 +47,7 @@ sudo apt-get install -y --no-install-recommends \
     libglu1-mesa-dev \
     freeglut3-dev \
     libeigen3-dev \
-    libfftw3-dev \
+    libfftw3-dev
   
 # compile Mitsuba 0.5
 scons -j 16
@@ -60,12 +62,12 @@ source ./setpath.sh
 conda env create -n mitsubaohd -f environment_tutorial.yml
 conda activate mitsubaohd
 
-cd ohd_tutorials
+cd ohd_tutorial
 # then run tutorial codes in several folders.
 ```
 
 ### Install with Docker
-Or, you can install with `Dockerfile`
+Or, you can install with `Dockerfile`:
 ```
 # build and run docker
 docker build -t mitsubaohd .
@@ -78,7 +80,7 @@ source ./setpath.sh
 
 # run tutorial
 conda activate mitsubaohd
-cd ohd_tutorials
+cd ohd_tutorial
 ```
 
 
